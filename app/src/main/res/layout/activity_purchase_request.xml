@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_light"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- 화면 제목 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="📝 구매신청서"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="16dp"
+            android:gravity="center"
+            android:layout_gravity="center" />
+
+        <!-- 신청일 표시 -->
+        <TextView
+            android:id="@+id/tvRequestDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="구매신청일: 2024년 06월 07일"
+            android:textSize="18sp"
+            android:textColor="@color/text_secondary"
+            android:layout_marginBottom="32dp"
+            android:layout_gravity="center"
+            android:background="@drawable/date_background"
+            android:padding="12dp" />
+
+        <!-- 필수 입력 안내 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="⚠️ ✅ 표시는 필수 입력 항목입니다"
+            android:textSize="16sp"
+            android:textColor="@color/accent_color"
+            android:layout_marginBottom="24dp"
+            android:background="@drawable/notice_background"
+            android:padding="12dp" />
+
+        <!-- 신청자 이름 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="✅ 신청자 이름"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/etApplicantName"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:textSize="20sp"
+            android:padding="16dp"
+            android:background="@drawable/edittext_background"
+            android:hint="예) 홍길동"
+            android:textColorHint="@color/text_hint"
+            android:layout_marginBottom="20dp"
+            android:inputType="textPersonName"
+            android:maxLines="1" />
+
+        <!-- 신청자 소속 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="✅ 신청자 소속"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/etApplicantDepartment"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:textSize="20sp"
+            android:padding="16dp"
+            android:background="@drawable/edittext_background"
+            android:hint="예) 축산팀, 농기계팀"
+            android:textColorHint="@color/text_hint"
+            android:layout_marginBottom="20dp"
+            android:inputType="text"
+            android:maxLines="1" />
+
+        <!-- 장비명 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="✅ 구매할 장비/물품"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/etEquipmentName"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:textSize="20sp"
+            android:padding="16dp"
+            android:background="@drawable/edittext_background"
+            android:hint="예) 사료배합기, 볼트 10개"
+            android:textColorHint="@color/text_hint"
+            android:layout_marginBottom="20dp"
+            android:inputType="text"
+            android:maxLines="1" />
+
+        <!-- 장소 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="✅ 사용 장소"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/etLocation"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:textSize="20sp"
+            android:padding="16dp"
+            android:background="@drawable/edittext_background"
+            android:hint="예) 1번 축사, 농기계 창고"
+            android:textColorHint="@color/text_hint"
+            android:layout_marginBottom="20dp"
+            android:inputType="text"
+            android:maxLines="1" />
+
+        <!-- 용도 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="✅ 사용 용도"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/etPurpose"
+            android:layout_width="match_parent"
+            android:layout_height="88dp"
+            android:textSize="20sp"
+            android:padding="16dp"
+            android:background="@drawable/edittext_background"
+            android:hint="예) 사료 배합 작업, 트랙터 수리"
+            android:textColorHint="@color/text_hint"
+            android:layout_marginBottom="20dp"
+            android:inputType="textMultiLine"
+            android:gravity="top|start"
+            android:maxLines="3" />
+
+        <!-- 기타사항 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="💬 기타사항 (선택)"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/etNote"
+            android:layout_width="match_parent"
+            android:layout_height="88dp"
+            android:textSize="20sp"
+            android:padding="16dp"
+            android:background="@drawable/edittext_background"
+            android:hint="추가로 전달할 내용이 있으면 입력하세요"
+            android:textColorHint="@color/text_hint"
+            android:layout_marginBottom="32dp"
+            android:inputType="textMultiLine"
+            android:gravity="top|start"
+            android:maxLines="3" />
+
+        <!-- 사진 섹션 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/photo_section_background"
+            android:padding="20dp"
+            android:layout_marginBottom="32dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📸 사진 첨부 (선택)"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"
+                android:layout_marginBottom="12dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="장비 고장 상황이나 구매제품 실물 혹은 문제 상황 등"
+                android:textSize="16sp"
+                android:textColor="@color/text_secondary"
+                android:layout_marginBottom="16dp" />
+
+            <Button
+                android:id="@+id/btnTakePhoto"
+                android:layout_width="200dp"
+                android:layout_height="64dp"
+                android:text="📷 사진 촬영"
+                android:textSize="18sp"
+                android:background="@drawable/button_photo"
+                android:textColor="@color/white"
+                android:layout_marginBottom="16dp"
+                android:layout_gravity="center"
+                android:elevation="4dp" />
+
+            <ImageView
+                android:id="@+id/ivPhoto"
+                android:layout_width="240dp"
+                android:layout_height="240dp"
+                android:background="@drawable/photo_placeholder_background"
+                android:scaleType="centerCrop"
+                android:layout_gravity="center"
+                android:contentDescription="첨부 사진" />
+
+        </LinearLayout>
+
+        <!-- 제출 버튼 -->
+        <Button
+            android:id="@+id/btnSubmit"
+            android:layout_width="match_parent"
+            android:layout_height="88dp"
+            android:text="📤 구매신청 제출"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:background="@drawable/button_submit"
+            android:textColor="@color/white"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="32dp"
+            android:elevation="8dp" />
+
+        <!-- 하단 안내 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="✅ 제출하면 관리자가 실시간으로 확인할 수 있습니다\n📸 사진이 있으면 이메일로도 전송됩니다"
+            android:textSize="14sp"
+            android:textColor="@color/text_secondary"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:background="@drawable/info_background"
+            android:padding="16dp" />
+
+    </LinearLayout>
+</ScrollView>

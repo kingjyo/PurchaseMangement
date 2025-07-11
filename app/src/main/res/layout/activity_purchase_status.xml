@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/background_light">
+
+    <!-- 헤더 섹션 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/header_background"
+        android:padding="20dp"
+        android:elevation="4dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="📊 구매신청 현황"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:layout_gravity="center" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="대기중인 신청만 표시됩니다"
+            android:textSize="16sp"
+            android:textColor="@color/white"
+            android:layout_gravity="center"
+            android:layout_marginTop="8dp" />
+
+    </LinearLayout>
+
+    <!-- 안내 메시지 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@drawable/notice_background_blue"
+        android:padding="16dp"
+        android:layout_margin="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="💡"
+            android:textSize="20sp"
+            android:layout_marginEnd="8dp" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="항목을 터치하면 승인/거부할 수 있습니다\n실제 관리는 Google Sheets에서 하는 것을 권장합니다"
+            android:textSize="16sp"
+            android:textColor="@color/text_primary"
+            android:lineSpacingExtra="4dp" />
+
+    </LinearLayout>
+
+    <!-- 목록 섹션 -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_margin="8dp">
+
+        <!-- 신청 목록 -->
+        <ListView
+            android:id="@+id/lvPendingRequests"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:divider="@color/divider"
+            android:dividerHeight="2dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:clipToPadding="false"
+            android:scrollbars="vertical"
+            android:fadeScrollbars="false" />
+
+        <!-- 빈 상태 메시지 -->
+        <LinearLayout
+            android:id="@+id/llEmptyState"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📭"
+                android:textSize="64sp"
+                android:layout_gravity="center"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="대기중인 구매신청이 없습니다"
+                android:textSize="20sp"
+                android:textColor="@color/text_secondary"
+                android:layout_gravity="center"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="새로운 신청이 들어오면 여기에 표시됩니다"
+                android:textSize="16sp"
+                android:textColor="@color/text_hint"
+                android:layout_gravity="center" />
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+    <!-- 하단 버튼 영역 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@drawable/bottom_bar_background"
+        android:padding="16dp"
+        android:elevation="4dp">
+
+        <Button
+            android:id="@+id/btnRefresh"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:text="🔄 새로고침"
+            android:textSize="16sp"
+            android:background="@drawable/button_refresh"
+            android:textColor="@color/white"
+            android:layout_marginEnd="8dp"
+            android:elevation="2dp" />
+
+        <Button
+            android:id="@+id/btnGoToSheets"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:text="📊 Google Sheets"
+            android:textSize="16sp"
+            android:background="@drawable/button_sheets"
+            android:textColor="@color/white"
+            android:layout_marginStart="8dp"
+            android:elevation="2dp" />
+
+    </LinearLayout>
+
+</LinearLayout>

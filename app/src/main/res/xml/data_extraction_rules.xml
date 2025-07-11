@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <cloud-backup>
+        <!-- 데이터베이스는 백업에서 제외 -->
+        <exclude domain="database"/>
+        <!-- 사진 파일은 백업에서 제외 -->
+        <exclude domain="external" path="Pictures/"/>
+    </cloud-backup>
+
+    <device-transfer>
+        <!-- 기기 이전시에도 민감 데이터 제외 -->
+        <exclude domain="database"/>
+        <exclude domain="external" path="Pictures/"/>
+    </device-transfer>
+</data-extraction-rules>

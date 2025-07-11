@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.accompany.PurchaseManagement">
+
+    <!-- 인터넷 권한 (Google Sheets 연동용) -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- 카메라 권한 -->
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- 외부 저장소 권한 -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+
+    <!-- Android 13+ 미디어 권한 -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
+
+    <!-- 카메라 하드웨어 (선택사항) -->
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="구매신청"
+        android:theme="@style/Theme.PurchaseRequest"
+        android:requestLegacyExternalStorage="true"
+        tools:targetApi="31">
+
+        <!-- 메인 액티비티 -->
+        <activity
+            android:name="com.accompany.PurchaseManagement.MainActivity"
+            android:exported="true"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- 구매신청 액티비티 -->
+        <activity
+            android:name="com.accompany.PurchaseManagement.PurchaseRequestActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:label="구매신청"
+            android:windowSoftInputMode="adjustResize"
+            android:parentActivityName="com.accompany.PurchaseManagement.MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.accompany.PurchaseManagement.MainActivity" />
+        </activity>
+
+        <!-- 구매신청 현황 액티비티 -->
+        <activity
+            android:name="com.accompany.PurchaseManagement.PurchaseStatusActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:label="구매신청 현황"
+            android:parentActivityName="com.accompany.PurchaseManagement.MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.accompany.PurchaseManagement.MainActivity" />
+        </activity>
+
+        <!-- 구매신청 기록 액티비티 -->
+        <activity
+            android:name="com.accompany.PurchaseManagement.PurchaseHistoryActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:label="구매신청 기록"
+            android:parentActivityName="com.accompany.PurchaseManagement.MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.accompany.PurchaseManagement.MainActivity" />
+        </activity>
+
+        <!-- 파일 제공자 (이미지 및 엑셀 파일 공유용) -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+        <service
+            android:name=".MyFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+    </application>
+
+</manifest>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 외부 파일 디렉토리 -->
+    <external-files-path
+        name="external_files"
+        path="." />
+
+    <external-files-path name="images" path="Pictures" />
+
+    <!-- 문서 폴더 -->
+    <external-files-path
+        name="documents"
+        path="Documents/" />
+
+    <!-- 사진 폴더 -->
+    <external-files-path
+        name="pictures"
+        path="Pictures/" />
+
+    <!-- 다운로드 폴더 (필요시) -->
+    <external-files-path
+        name="downloads"
+        path="Downloads/" />
+</paths>

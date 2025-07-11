@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content" android:padding="12dp"
+    android:background="@android:color/white">
+
+    <TextView android:id="@+id/tvCattleId" style="@style/TextAppearance.AppCompat.Medium"/>
+    <TextView android:id="@+id/tvTagNumber" style="@style/TextAppearance.AppCompat.Medium"/>
+    <TextView android:id="@+id/tvBirth" style="@style/TextAppearance.AppCompat.Small"/>
+    <TextView android:id="@+id/tvKind" style="@style/TextAppearance.AppCompat.Small"/>
+    <TextView android:id="@+id/tvWeight" style="@style/TextAppearance.AppCompat.Small"/>
+    <TextView android:id="@+id/tvBarn" style="@style/TextAppearance.AppCompat.Small"/>
+    <TextView android:id="@+id/tvStatus" style="@style/TextAppearance.AppCompat.Small"/>
+    <TextView android:id="@+id/tvSex" style="@style/TextAppearance.AppCompat.Small"/>
+</LinearLayout>

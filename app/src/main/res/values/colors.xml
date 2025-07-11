@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- 기본 색상 -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="transparent">#00000000</color>
+
+    <!-- 주요 브랜드 색상 -->
+    <color name="primary_color">#4CAF50</color>        <!-- 녹색 - 구매신청 -->
+    <color name="secondary_color">#2196F3</color>      <!-- 파랑 - 현황 -->
+    <color name="tertiary_color">#FF9800</color>       <!-- 주황 - 기록 -->
+    <color name="accent_color">#FF5722</color>         <!-- 강조 색상 -->
+
+    <!-- 상태 색상 -->
+    <color name="success_color">#4CAF50</color>        <!-- 완료/승인 -->
+    <color name="warning_color">#FF9800</color>        <!-- 대기중 -->
+    <color name="error_color">#F44336</color>          <!-- 거부/오류 -->
+    <color name="info_color">#2196F3</color>           <!-- 정보 -->
+
+    <!-- 텍스트 색상 -->
+    <color name="text_primary">#212121</color>         <!-- 주요 텍스트 -->
+    <color name="text_secondary">#757575</color>       <!-- 보조 텍스트 -->
+    <color name="text_hint">#BDBDBD</color>            <!-- 힌트 텍스트 -->
+    <color name="text_disabled">#E0E0E0</color>        <!-- 비활성 텍스트 -->
+
+    <!-- 배경 색상 -->
+    <color name="background_light">#F5F5F5</color>     <!-- 밝은 배경 -->
+    <color name="background_white">#FFFFFF</color>     <!-- 흰색 배경 -->
+    <color name="background_card">#FAFAFA</color>      <!-- 카드 배경 -->
+    <color name="background_section">#EEEEEE</color>   <!-- 섹션 배경 -->
+
+    <!-- 구분선 -->
+    <color name="divider">#E0E0E0</color>              <!-- 기본 구분선 -->
+    <color name="divider_light">#F0F0F0</color>        <!-- 연한 구분선 -->
+    <color name="divider_dark">#CCCCCC</color>         <!-- 진한 구분선 -->
+
+    <!-- 버튼 색상 -->
+    <color name="button_primary">#4CAF50</color>       <!-- 주요 버튼 (구매신청) -->
+    <color name="button_secondary">#2196F3</color>     <!-- 보조 버튼 (현황) -->
+    <color name="button_tertiary">#FF9800</color>      <!-- 3차 버튼 (기록) -->
+    <color name="button_admin">#795548</color>         <!-- 관리자 버튼 -->
+    <color name="button_submit">#F44336</color>        <!-- 제출 버튼 -->
+    <color name="button_photo">#9C27B0</color>         <!-- 사진 버튼 -->
+    <color name="button_export">#607D8B</color>        <!-- 추출 버튼 -->
+    <color name="button_refresh">#00BCD4</color>       <!-- 새로고침 버튼 -->
+    <color name="button_sheets">#34A853</color>        <!-- Google Sheets 버튼 -->
+
+    <!-- 상태별 배경 색상 -->
+    <color name="status_pending">#FFF3E0</color>       <!-- 대기중 배경 -->
+    <color name="status_completed">#E8F5E8</color>     <!-- 완료 배경 -->
+    <color name="status_rejected">#FFEBEE</color>      <!-- 거부 배경 -->
+
+    <!-- 알림/안내 배경 -->
+    <color name="notice_background">#FFF9C4</color>    <!-- 일반 안내 -->
+    <color name="notice_blue">#E3F2FD</color>          <!-- 파란 안내 -->
+    <color name="notice_green">#E8F5E8</color>         <!-- 녹색 안내 -->
+    <color name="notice_orange">#FFF3E0</color>        <!-- 주황 안내 -->
+    <color name="notice_red">#FFEBEE</color>           <!-- 빨간 안내 -->
+
+    <!-- 그라데이션 색상 -->
+    <color name="gradient_start">#4CAF50</color>       <!-- 그라데이션 시작 -->
+    <color name="gradient_end">#2E7D32</color>         <!-- 그라데이션 끝 -->
+
+    <!-- 투명도가 있는 색상 -->
+    <color name="overlay_light">#80FFFFFF</color>      <!-- 밝은 오버레이 -->
+    <color name="overlay_dark">#80000000</color>       <!-- 어두운 오버레이 -->
+    <color name="shadow">#1A000000</color>             <!-- 그림자 -->
+
+    <!-- 특수 목적 색상 -->
+    <color name="photo_placeholder">#EEEEEE</color>    <!-- 사진 플레이스홀더 -->
+    <color name="input_border">#DDDDDD</color>         <!-- 입력창 테두리 -->
+    <color name="input_background">#FAFAFA</color>     <!-- 입력창 배경 -->
+    <color name="card_border">#E8E8E8</color>          <!-- 카드 테두리 -->
+
+</resources>

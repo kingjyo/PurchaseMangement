@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <EditText
+        android:id="@+id/etSearch"
+        android:hint="개체번호/관리번호/이표번호 검색"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:drawableStart="@android:drawable/ic_menu_search"
+        android:imeOptions="actionSearch"
+        android:inputType="text" />
+
+    <ListView
+        android:id="@+id/lvCattle"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:divider="@android:color/darker_gray"
+        android:dividerHeight="1dp"
+        android:listSelector="@android:color/holo_blue_light" />
+
+</LinearLayout>

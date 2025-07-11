@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- 데이터베이스 백업 제외 -->
+    <exclude domain="database"/>
+
+    <!-- 캐시 디렉토리 백업 제외 -->
+    <exclude domain="cache"/>
+
+    <!-- 외부 저장소의 사진 디렉토리 백업 제외 -->
+    <exclude domain="external" path="Pictures/"/>
+
+    <!-- 임시 파일 백업 제외 -->
+    <exclude domain="external" path="temp/"/>
+</full-backup-content>

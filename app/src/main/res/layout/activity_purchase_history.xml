@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/background_light">
+
+    <!-- 헤더 섹션 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@drawable/header_background_orange"
+        android:padding="20dp"
+        android:elevation="4dp"
+        android:gravity="center_vertical">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📈 구매신청 기록"
+                android:textSize="28sp"
+                android:textStyle="bold"
+                android:textColor="@color/white" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="로컬에 저장된 모든 기록"
+                android:textSize="16sp"
+                android:textColor="@color/white"
+                android:layout_marginTop="4dp" />
+
+        </LinearLayout>
+
+        <!-- 엑셀 추출 버튼 -->
+        <Button
+            android:id="@+id/btnExportToExcel"
+            android:layout_width="120dp"
+            android:layout_height="60dp"
+            android:text="📊 엑셀\n추출"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:background="@drawable/button_export"
+            android:textColor="@color/white"
+            android:elevation="4dp"
+            android:gravity="center" />
+
+    </LinearLayout>
+
+    <!-- 통계 정보 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@drawable/stats_background"
+        android:padding="16dp"
+        android:layout_margin="16dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/tvTotalCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="@color/accent_color" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="총 기록"
+                android:textSize="14sp"
+                android:textColor="@color/text_secondary" />
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@color/divider" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/tvPendingCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="@color/warning_color" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="대기중"
+                android:textSize="14sp"
+                android:textColor="@color/text_secondary" />
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@color/divider" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/tvCompletedCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="@color/success_color" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="완료"
+                android:textSize="14sp"
+                android:textColor="@color/text_secondary" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- 안내 메시지 -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="💡 실시간 데이터는 Google Sheets에서 확인하세요. 여기는 로컬 백업 데이터입니다."
+        android:textSize="14sp"
+        android:textColor="@color/text_secondary"
+        android:background="@drawable/notice_background_light"
+        android:padding="12dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="8dp"
+        android:gravity="center" />
+
+    <!-- 목록 섹션 -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_margin="8dp">
+
+        <!-- 기록 목록 -->
+        <ListView
+            android:id="@+id/lvAllRequests"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:divider="@color/divider"
+            android:dividerHeight="1dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:clipToPadding="false"
+            android:scrollbars="vertical"
+            android:fadeScrollbars="false" />
+
+        <!-- 빈 상태 메시지 -->
+        <LinearLayout
+            android:id="@+id/llEmptyState"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📄"
+                android:textSize="64sp"
+                android:layout_gravity="center"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="저장된 기록이 없습니다"
+                android:textSize="20sp"
+                android:textColor="@color/text_secondary"
+                android:layout_gravity="center"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="구매신청을 하면 여기에 기록됩니다"
+                android:textSize="16sp"
+                android:textColor="@color/text_hint"
+                android:layout_gravity="center" />
+
+        </LinearLayout>
+
+        <!-- 로딩 표시 -->
+        <LinearLayout
+            android:id="@+id/llLoading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <ProgressBar
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="기록을 불러오는 중..."
+                android:textSize="16sp"
+                android:textColor="@color/text_secondary"
+                android:layout_gravity="center" />
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+    <!-- 하단 정보 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/bottom_info_background"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="📊 엑셀 추출: CSV 파일로 저장되어 엑셀에서 열 수 있습니다"
+            android:textSize="12sp"
+            android:textColor="@color/text_hint"
+            android:layout_gravity="center"
+            android:layout_marginBottom="4dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🔄 새로고침: 뒤로 갔다가 다시 들어오세요"
+            android:textSize="12sp"
+            android:textColor="@color/text_hint"
+            android:layout_gravity="center" />
+
+    </LinearLayout>
+
+</LinearLayout>

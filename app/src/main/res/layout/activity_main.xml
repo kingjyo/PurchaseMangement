@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="32dp"
+    android:gravity="center"
+    android:background="@color/background_light">
+
+    <!-- 앱 제목 -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="📋 구매신청 시스템"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        android:textColor="@color/text_primary"
+        android:layout_marginBottom="48dp"
+        android:gravity="center" />
+
+    <!-- 구매신청 버튼 (가장 중요 - 녹색) -->
+    <Button
+        android:id="@+id/btnPurchaseRequest"
+        android:layout_width="320dp"
+        android:layout_height="90dp"
+        android:text="📝 구매신청"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="24dp"
+        android:background="@drawable/button_primary"
+        android:textColor="@color/white"
+        android:elevation="8dp"
+        android:clickable="true"
+        android:focusable="true" />
+
+    <!-- 구매신청 현황 버튼 (파란색) -->
+    <Button
+        android:id="@+id/btnPurchaseStatus"
+        android:layout_width="320dp"
+        android:layout_height="90dp"
+        android:text="📊 구매신청 현황"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="24dp"
+        android:background="@drawable/button_secondary"
+        android:textColor="@color/white"
+        android:elevation="8dp"
+        android:clickable="true"
+        android:focusable="true" />
+
+    <!-- 구매신청 기록 버튼 (주황색) -->
+    <Button
+        android:id="@+id/btnPurchaseHistory"
+        android:layout_width="320dp"
+        android:layout_height="90dp"
+        android:text="📈 구매신청 기록"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="24dp"
+        android:background="@drawable/button_tertiary"
+        android:textColor="@color/white"
+        android:elevation="8dp"
+        android:clickable="true"
+        android:focusable="true" />
+
+    <!-- 구분선 -->
+    <View
+        android:layout_width="200dp"
+        android:layout_height="2dp"
+        android:background="@color/divider"
+        android:layout_marginBottom="24dp" />
+
+    <!-- 안내 텍스트 -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="💡 하이브리드 시스템: 텍스트는 실시간 엑셀, 사진은 이메일"
+        android:textSize="14sp"
+        android:textColor="@color/text_secondary"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:maxLines="2" />
+
+    <!-- 🐄 축우현황 버튼 (맨 아래/버전정보 위) -->
+    <Button
+        android:id="@+id/btnCattleStatus"
+        android:layout_width="200dp"
+        android:layout_height="60dp"
+        android:text="🐄 축우현황 조회"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:layout_marginTop="36dp"
+        android:background="@drawable/button_cattle"
+        android:textColor="@color/white"
+        android:elevation="4dp"
+        android:clickable="true"
+        android:focusable="true" />
+
+    <!-- 버전 정보 -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="v1.0 | 관리자 버튼 길게 누르기 = 연결 테스트"
+        android:textSize="12sp"
+        android:textColor="@color/text_hint"
+        android:layout_marginTop="16dp"
+        android:gravity="center" />
+
+</LinearLayout>

@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "284458584690",
+    "project_id": "jedonggranchbuyingrequest",
+    "storage_bucket": "jedonggranchbuyingrequest.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:284458584690:android:928a7f4a2a7045d25950eb",
+        "android_client_info": {
+          "package_name": "com.accompany.purchaserequest"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "284458584690-vt6obodsq5npcsrskpdbteoauf4kri5j.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBaa12kZVTDV6MZYkVl0XcvhcnZOc9PvYE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "284458584690-vt6obodsq5npcsrskpdbteoauf4kri5j.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
