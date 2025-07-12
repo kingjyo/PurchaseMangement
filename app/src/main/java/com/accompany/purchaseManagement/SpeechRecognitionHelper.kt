@@ -9,6 +9,8 @@ import android.speech.SpeechRecognizer
 import android.util.Log
 import android.widget.Toast
 import java.util.*
+import android.os.Handler
+import android.os.Looper
 
 class SpeechRecognitionHelper(private val activity: Activity) {
 
@@ -217,6 +219,3 @@ class SpeechRecognitionHelper(private val activity: Activity) {
     }
 }
 
-// Handler, Looper import 추가
-import android.os.Handler
-import android.os.Looper

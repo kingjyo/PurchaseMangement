@@ -1,0 +1,14 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- 문틀(문) -->
+    <path
+        android:fillColor="#FF616161"
+        android:pathData="M5,3h7a2,2 0 0,1 2,2v3h-2v-3h-7v14h7v-3h2v3a2,2 0 0,1 -2,2h-7a2,2 0 0,1 -2,-2v-14a2,2 0 0,1 2,-2z"/>
+    <!-- 오른쪽 화살표 (나가기) -->
+    <path
+        android:fillColor="#FF1976D2"
+        android:pathData="M16,17l1.41,-1.41L13.83,12l3.58,-3.59L16,7l-5,5 5,5z"/>
+</vector>

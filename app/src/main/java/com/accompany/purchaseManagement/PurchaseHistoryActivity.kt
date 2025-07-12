@@ -13,14 +13,14 @@ import java.io.File
 import java.io.FileWriter
 import java.text.SimpleDateFormat
 import java.util.*
-import com.accompany.purchaserequest.R
+import com.accompany.purchaseManagement.PurchaseRequestAdapterV2
 
 class PurchaseHistoryActivity : AppCompatActivity() {
 
     private lateinit var lvAllRequests: ListView
     private lateinit var btnExportToExcel: Button
     private lateinit var dbHelper: PurchaseRequestDbHelper
-    private lateinit var adapter: PurchaseRequestAdapter
+    private lateinit var adapter: PurchaseRequestListAdapter
     private var allRequests: List<PurchaseRequest> = emptyList()
 
 
@@ -43,9 +43,19 @@ class PurchaseHistoryActivity : AppCompatActivity() {
     }
 
     private fun loadAllRequests() {
-        allRequests = dbHelper.getAllRequests()
-        adapter = PurchaseRequestAdapter(this, allRequests, null) // 클릭 리스너 없음 (조회만)
+        allRequests = dbHelper.getAllRequestsV2()  // V2로 데이터 클래스 일치시켜서 불러오기
+        adapter = PurchaseRequestListAdapter(
+            context = this,
+            requests = allRequests,
+            currentUser = null,  // 조회용이라 null 넣어도 무방
+            onItemClick = null,
+            onEditClick = null
+        )
         lvAllRequests.adapter = adapter
+
+        // 데이터가 없으면 빈 상태 표시하기 (필요시)
+        // val llEmptyState = findViewById<View>(R.id.llEmptyState)
+        // llEmptyState.visibility = if (allRequests.isEmpty()) View.VISIBLE else View.GONE
     }
 
     private fun setupClickListeners() {

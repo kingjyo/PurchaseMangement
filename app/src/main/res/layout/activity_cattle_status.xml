@@ -5,7 +5,7 @@
     android:padding="16dp">
 
     <EditText
-        android:id="@+id/etSearch"
+        android:id="@+id/search_input"
         android:hint="개체번호/관리번호/이표번호 검색"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -14,7 +14,7 @@
         android:inputType="text" />
 
     <ListView
-        android:id="@+id/lvCattle"
+        android:id="@+id/cattle_listview"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"

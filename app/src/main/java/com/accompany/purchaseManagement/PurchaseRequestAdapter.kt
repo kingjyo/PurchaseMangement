@@ -1,58 +1,76 @@
 package com.accompany.purchaseManagement
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
-import android.widget.TextView
-import androidx.recyclerview.widget.RecyclerView
+import android.widget.*
 import com.google.android.material.chip.Chip
 import java.text.SimpleDateFormat
 import java.util.*
-import com.accompany.purchaseManagement.R
 
-class PurchaseRequestAdapterV2(
+class PurchaseRequestListAdapter(
+    private val context: Context,
     private val requests: List<PurchaseRequestV2>,
     private val currentUser: GoogleAuthHelper.UserInfo?,
-    private val onItemClick: (PurchaseRequestV2) -> Unit,
+    private val onItemClick: ((PurchaseRequestV2) -> Unit)? = null,
     private val onEditClick: ((PurchaseRequestV2) -> Unit)? = null
-) : RecyclerView.Adapter<PurchaseRequestAdapterV2.ViewHolder>() {
+) : BaseAdapter() {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_purchase_request_v2, parent, false)
-        return ViewHolder(view)
+    override fun getCount() = requests.size
+
+    override fun getItem(position: Int) = requests[position]
+
+    override fun getItemId(position: Int) = position.toLong()
+
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+        val viewHolder: ViewHolder
+        val view: View
+
+        if (convertView == null) {
+            view = LayoutInflater.from(context).inflate(R.layout.item_purchase_request_v2, parent, false)
+            viewHolder = ViewHolder(view)
+            view.tag = viewHolder
+        } else {
+            view = convertView
+            viewHolder = view.tag as ViewHolder
+        }
+
+        val request = getItem(position)
+        viewHolder.bind(request)
+
+        // 아이템 전체 클릭 리스너
+        view.setOnClickListener {
+            onItemClick?.invoke(request)
+        }
+
+        // 수정 버튼 클릭 리스너
+        viewHolder.btnEdit.setOnClickListener {
+            onEditClick?.invoke(request)
+        }
+
+        return view
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(requests[position])
-    }
-
-    override fun getItemCount() = requests.size
-
-    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val tvApplicantName: TextView = itemView.findViewById(R.id.tvApplicantName)
-        private val tvApplicantDepartment: TextView = itemView.findViewById(R.id.tvApplicantDepartment)
-        private val tvEquipmentInfo: TextView = itemView.findViewById(R.id.tvEquipmentInfo)
-        private val tvPurpose: TextView = itemView.findViewById(R.id.tvPurpose)
-        private val tvLocation: TextView = itemView.findViewById(R.id.tvLocation)
-        private val tvRequestDate: TextView = itemView.findViewById(R.id.tvRequestDate)
-        private val tvPhotoCount: TextView = itemView.findViewById(R.id.tvPhotoCount)
-        private val chipStatus: Chip = itemView.findViewById(R.id.chipStatus)
-        private val btnEdit: ImageButton = itemView.findViewById(R.id.btnEdit)
+    inner class ViewHolder(private val view: View) {
+        val tvApplicantName: TextView = view.findViewById(R.id.tvApplicantName)
+        val tvApplicantDepartment: TextView = view.findViewById(R.id.tvApplicantDepartment)
+        val tvEquipmentInfo: TextView = view.findViewById(R.id.tvEquipmentInfo)
+        val tvPurpose: TextView = view.findViewById(R.id.tvPurpose)
+        val tvLocation: TextView = view.findViewById(R.id.tvLocation)
+        val tvRequestDate: TextView = view.findViewById(R.id.tvRequestDate)
+        val tvPhotoCount: TextView = view.findViewById(R.id.tvPhotoCount)
+        val chipStatus: Chip = view.findViewById(R.id.chipStatus)
+        val btnEdit: ImageButton = view.findViewById(R.id.btnEdit)
 
         fun bind(request: PurchaseRequestV2) {
-            // 신청자 정보
             tvApplicantName.text = request.applicantName
             tvApplicantDepartment.text = request.applicantDepartment
 
-            // 장비 정보
             tvEquipmentInfo.text = "🔧 ${request.equipmentName} (${request.quantity}개)"
 
-            // 용도
             tvPurpose.text = "📝 ${request.purpose}"
 
-            // 장소 (있을 경우만)
             if (request.location.isNotEmpty()) {
                 tvLocation.visibility = View.VISIBLE
                 tvLocation.text = "📍 ${request.location}"
@@ -60,7 +78,6 @@ class PurchaseRequestAdapterV2(
                 tvLocation.visibility = View.GONE
             }
 
-            // 날짜 포맷팅
             try {
                 val inputFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.KOREA)
                 val outputFormat = SimpleDateFormat("MM/dd HH:mm", Locale.KOREA)
@@ -70,7 +87,6 @@ class PurchaseRequestAdapterV2(
                 tvRequestDate.text = "🕐 ${request.requestDate}"
             }
 
-            // 사진 개수
             if (request.photoUrls.isNotEmpty()) {
                 tvPhotoCount.visibility = View.VISIBLE
                 tvPhotoCount.text = "📸 ${request.photoUrls.size}"
@@ -78,7 +94,6 @@ class PurchaseRequestAdapterV2(
                 tvPhotoCount.visibility = View.GONE
             }
 
-            // 상태
             val status = PurchaseStatus.fromString(request.status)
             chipStatus.text = "${status.emoji} ${status.displayName}"
             chipStatus.setChipBackgroundColorResource(
@@ -92,17 +107,8 @@ class PurchaseRequestAdapterV2(
                 }
             )
 
-            // 수정 버튼 (본인 + 수정 가능한 상태)
             val canEdit = request.applicantEmail == currentUser?.email && request.isModifiable()
             btnEdit.visibility = if (canEdit && onEditClick != null) View.VISIBLE else View.GONE
-            btnEdit.setOnClickListener {
-                onEditClick?.invoke(request)
-            }
-
-            // 아이템 클릭
-            itemView.setOnClickListener {
-                onItemClick(request)
-            }
         }
     }
 }

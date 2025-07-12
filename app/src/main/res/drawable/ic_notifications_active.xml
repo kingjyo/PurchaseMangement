@@ -1,0 +1,14 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- 종(알림) 본체 -->
+    <path
+        android:fillColor="#FF616161"
+        android:pathData="M12,22c1.1,0 2,-0.9 2,-2h-4c0,1.1 0.9,2 2,2zm6,-6v-5c0,-3.07 -1.63,-5.64 -4.5,-6.32v-0.68c0,-0.83 -0.67,-1.5 -1.5,-1.5s-1.5,0.67 -1.5,1.5v0.68c-2.87,0.68 -4.5,3.25 -4.5,6.32v5l-1.99,2c-0.14,0.14 -0.21,0.33 -0.21,0.53 0,0.39 0.32,0.7 0.7,0.7h16c0.39,0 0.7,-0.31 0.7,-0.7 0,-0.2 -0.07,-0.39 -0.21,-0.53l-1.99,-2z"/>
+    <!-- 알림 울림 표시(동그란 빨강) -->
+    <path
+        android:fillColor="#FFF44336"
+        android:pathData="M18,6a2,2 0 1,1 -4,0a2,2 0 1,1 4,0"/>
+</vector>

@@ -24,8 +24,25 @@
 <!-- 배경 색상 -->
 <color name="background_light">#F5F5F5</color>
 <color name="background_white">#FFFFFF</color>
+    <color name="background_section">#F3F3F3</color>
+    <color name="notice_blue">#2196F3</color>
+    <color name="button_admin">#FF7043</color>
+    <color name="button_export">#009688</color>
+    <color name="button_photo">#7E57C2</color>
+    <color name="button_primary">#1976D2</color>
+    <color name="button_refresh">#388E3C</color>
+    <color name="button_secondary">#03A9F4</color>
+    <color name="button_sheets">#43A047</color>
+    <color name="button_submit">#388E3C</color>
+    <color name="button_tertiary">#FBC02D</color>
+    <color name="notice_background">#FFF9C4</color>
+    <color name="input_border">#BDBDBD</color>
+    <color name="tertiary_color">#FFD54F</color>
+    <color name="notice_green">#43A047</color>
+    <color name="photo_placeholder">#EEEEEE</color>
 
-<!-- 텍스트 색상 -->
+
+    <!-- 텍스트 색상 -->
 <color name="text_primary">#212121</color>
 <color name="text_secondary">#757575</color>
 <color name="text_hint">#BDBDBD</color>

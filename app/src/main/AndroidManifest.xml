@@ -6,6 +6,8 @@
     <!-- 인터넷 권한 (Google Sheets 연동용) -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
 
     <!-- 카메라 권한 -->
     <uses-permission android:name="android.permission.CAMERA" />
@@ -27,6 +29,7 @@
         android:required="false" />
 
     <application
+        android:name=".config.FirebaseConfig"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -38,8 +41,9 @@
 
         <!-- 메인 액티비티 -->
         <activity
-            android:name="com.accompany.PurchaseManagement.MainActivity"
+            android:name=".MainActivity"
             android:exported="true"
+            android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
@@ -48,41 +52,56 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".auth.LoginActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".auth.RegisterActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
         <!-- 구매신청 액티비티 -->
         <activity
-            android:name="com.accompany.PurchaseManagement.PurchaseRequestActivity"
+            android:name=".PurchaseRequestActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             android:label="구매신청"
             android:windowSoftInputMode="adjustResize"
-            android:parentActivityName="com.accompany.PurchaseManagement.MainActivity">
+            android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.accompany.PurchaseManagement.MainActivity" />
+                android:value=".MainActivity" />
         </activity>
 
         <!-- 구매신청 현황 액티비티 -->
         <activity
-            android:name="com.accompany.PurchaseManagement.PurchaseStatusActivity"
+            android:name=".PurchaseStatusActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             android:label="구매신청 현황"
-            android:parentActivityName="com.accompany.PurchaseManagement.MainActivity">
+            android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.accompany.PurchaseManagement.MainActivity" />
+                android:value=".MainActivity" />
         </activity>
 
         <!-- 구매신청 기록 액티비티 -->
         <activity
-            android:name="com.accompany.PurchaseManagement.PurchaseHistoryActivity"
+            android:name=".PurchaseHistoryActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             android:label="구매신청 기록"
-            android:parentActivityName="com.accompany.PurchaseManagement.MainActivity">
+            android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.accompany.PurchaseManagement.MainActivity" />
+                android:value=".MainActivity" />
         </activity>
 
         <!-- 파일 제공자 (이미지 및 엑셀 파일 공유용) -->

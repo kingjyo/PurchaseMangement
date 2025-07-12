@@ -1,4 +1,4 @@
-package com.accompany.purchasemanagement
+package com.accompany.purchaseManagement
 
 import android.os.Bundle
 import android.widget.EditText
@@ -8,6 +8,7 @@ import android.text.TextWatcher
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.coroutines.*
 import android.widget.Toast
+
 
 class CattleStatusActivity : AppCompatActivity() {
     private lateinit var adapter: CattleAdapter
@@ -33,9 +34,9 @@ class CattleStatusActivity : AppCompatActivity() {
                     displayList.addAll(allList)
                 } else {
                     displayList.addAll(allList.filter {
-                        it.개체번호.contains(q, true)
-                                || it.관리번호.contains(q, true)
-                                || it.이표번호?.contains(q, true) == true
+                        it.tagNumber.contains(q, true)      // 개체번호
+                                || it.id.contains(q, true)          // 관리번호
+                                || it.eartagNumber?.contains(q, true) == true // 이표번호
                     })
                 }
                 adapter.notifyDataSetChanged()

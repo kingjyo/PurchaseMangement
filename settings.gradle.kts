@@ -6,10 +6,12 @@ pluginManagement {
     }
 }
 dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
     }
 }
-rootProject.name = "purchasemanagement" // 원하시는 이름으로
+
+rootProject.name = "PurchaseManagement"
 include(":app")

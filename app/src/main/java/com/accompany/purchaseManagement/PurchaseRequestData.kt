@@ -14,9 +14,9 @@ data class PurchaseRequestV2(
     @SerializedName("이메일") val applicantEmail: String,
 
     // 구매 정보
-    @SerializedName("장비명") val equipmentName: String,
+    @SerializedName("품목") val equipmentName: String,
     @SerializedName("수량") val quantity: String,
-    @SerializedName("장소") val location: String = "",  // 선택사항
+    @SerializedName("장비/장소") val location: String = "",  // 선택사항
     @SerializedName("용도") val purpose: String,
     @SerializedName("기타사항") val note: String = "",
 

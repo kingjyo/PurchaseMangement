@@ -1,4 +1,4 @@
-package com.accompany.PurchaseManagement
+package com.accompany.purchaseManagement
 
 import com.google.gson.annotations.SerializedName
 

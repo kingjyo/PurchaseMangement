@@ -48,7 +48,7 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
     private var location = ""
     private var purpose = ""
     private var note = ""
-    private val photoUris = mutableListOf<Uri>()
+    var photoUris = mutableListOf<Uri>()
 
     // Firebase
     private val db = FirebaseFirestore.getInstance()

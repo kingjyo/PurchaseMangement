@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
-import com.accompany.PurchaseManagement.Cattle
 
 class CattleAdapter(
     private val context: Context,
@@ -23,7 +22,6 @@ class CattleAdapter(
     override fun getCount(): Int = items.size
     override fun getItem(position: Int): Any = items[position]
     override fun getItemId(position: Int): Long = position.toLong()
-
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         val view = convertView ?: LayoutInflater.from(context).inflate(
             R.layout.item_cattle, parent, false

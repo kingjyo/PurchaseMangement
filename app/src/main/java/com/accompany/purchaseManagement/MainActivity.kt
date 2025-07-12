@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.launch
 
@@ -76,14 +77,14 @@ class MainActivity : AppCompatActivity() {
             if (currentUser?.name == "미설정" || currentUser?.department == "미설정") {
                 showProfileSetupDialog()
             } else {
-                val intent = Intent(this, PurchaseRequestActivity::class.java)
+                val intent = Intent(this, PurchaseStatusActivityV2::class.java)
                 startActivity(intent)
             }
         }
 
         // 구매신청 현황 버튼
         btnPurchaseStatus.setOnClickListener {
-            val intent = Intent(this, PurchaseStatusActivity::class.java)
+            val intent = Intent(this, PurchaseStatusActivityV2::class.java)
             startActivity(intent)
         }
 
@@ -275,7 +276,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun navigateToLogin() {
-        val intent = Intent(this, LoginActivity::class.java)
+        val intent = Intent(this, LoginActivityV2::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
         finish()
