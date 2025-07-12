@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
+import com.accompany.PurchaseManagement.Cattle
 
 class CattleAdapter(
     private val context: Context,
@@ -29,14 +30,15 @@ class CattleAdapter(
         )
         val cattle = items[position]
 
-        view.findViewById<TextView>(R.id.tvCattleId).text = "관리번호: ${cattle.관리번호}"
-        view.findViewById<TextView>(R.id.tvTagNumber).text = "개체번호: ${cattle.개체번호}"
-        view.findViewById<TextView>(R.id.tvBirth).text = "생년월일: ${cattle.생년월일} (${cattle.월령}개월)"
-        view.findViewById<TextView>(R.id.tvKind).text = "개체구분: ${cattle.개체구분}"
-        view.findViewById<TextView>(R.id.tvWeight).text = "체중: ${cattle.체중}"
-        view.findViewById<TextView>(R.id.tvBarn).text = "축사: ${cattle.축사}"
-        view.findViewById<TextView>(R.id.tvStatus).text = "상태: ${cattle.상태}"
-        view.findViewById<TextView>(R.id.tvSex).text = "성별: ${cattle.성별}"
+        view.findViewById<TextView>(R.id.tvCattleId).text = "관리번호: ${cattle.id}"
+        view.findViewById<TextView>(R.id.tvTagNumber).text = "개체번호: ${cattle.tagNumber}"
+        view.findViewById<TextView>(R.id.tvBirth).text = "생년월일: ${cattle.birthDate} (${cattle.monthAge}개월)"
+        view.findViewById<TextView>(R.id.tvKind).text = "개체구분: ${cattle.type}"
+        view.findViewById<TextView>(R.id.tvWeight).text = "체중: ${cattle.weight}"
+        view.findViewById<TextView>(R.id.tvBarn).text = "축사: ${cattle.barn}"
+        view.findViewById<TextView>(R.id.tvStatus).text = "상태: ${cattle.status}"
+        view.findViewById<TextView>(R.id.tvSex).text = "성별: ${cattle.gender}"
+
 
         view.setOnClickListener { onItemClick?.invoke(cattle) }
         return view

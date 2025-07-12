@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.accompany.PurchaseManagement"
+    namespace = "com.accompany.purchaseManagement"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.accompany.PurchaseManagement"
+        applicationId = "com.accompany.purchaseManagement"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
@@ -67,6 +67,22 @@ dependencies {
     implementation(libs.firebase.storage.ktx)   // 버전 X
     implementation ("com.google.firebase:firebase-messaging:24.1.1")
     implementation ("com.google.firebase:firebase-firestore:24.10.3")
+    implementation ("com.google.firebase:firebase-auth:23.1.0")
+
+// [Firebase BOM 방식 권장]
+    implementation(platform("com.google.firebase:firebase-bom:32.8.0"))
+    implementation("com.google.firebase:firebase-storage-ktx")
+    implementation("com.google.firebase:firebase-messaging-ktx")
+    implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation("com.google.firebase:firebase-auth-ktx")    // Google Sign In
+    implementation ("com.google.android.gms:play-services-auth:21.2.0")
+
+    // 네이버 로그인 SDK
+    implementation ("com.navercorp.nid:oauth:5.9.0")
+
+    // 이미지 로딩 라이브러리 (Glide)
+    implementation ("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.16.0")
 
     // Coroutines (Google Sheets 연동용)
     implementation(libs.kotlinx.coroutines.core)

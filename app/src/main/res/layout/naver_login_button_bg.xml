@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 눌렸을 때 -->
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#00C73C" /> <!-- 네이버 진한 초록 -->
+            <corners android:radius="4dp" />
+        </shape>
+    </item>
+
+    <!-- 기본 상태 -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#03C75A" /> <!-- 네이버 초록 -->
+            <corners android:radius="4dp" />
+        </shape>
+    </item>
+</selector>

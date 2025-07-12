@@ -1,83 +1,235 @@
 package com.accompany.purchaseManagement
 
+import android.content.Intent
 import android.os.Bundle
-import android.widget.ListView
+import android.view.View
+import android.widget.ProgressBar
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import kotlinx.coroutines.launch
-import androidx.appcompat.app.AlertDialog
-import com.accompany.purchaserequest.R
+import kotlinx.coroutines.tasks.await
 
-class PurchaseStatusActivity : AppCompatActivity() {
+class PurchaseStatusActivityV2 : AppCompatActivity() {
 
-    private lateinit var lvPendingRequests: ListView
-    private lateinit var adapter: PurchaseRequestAdapter
+    private lateinit var chipGroupStatus: ChipGroup
+    private lateinit var rvRequests: RecyclerView
+    private lateinit var progressBar: ProgressBar
+    private lateinit var llEmptyState: View
+    private lateinit var fabRefresh: FloatingActionButton
+
+    private lateinit var requestAdapter: PurchaseRequestAdapterV2
+    private val db = FirebaseFirestore.getInstance()
+    private lateinit var googleAuthHelper: GoogleAuthHelper
+    private lateinit var fcmHelper: FcmNotificationHelper
+
+    private var currentUser: GoogleAuthHelper.UserInfo? = null
+    private var selectedStatus: String = "전체"
+    private val requestList = mutableListOf<PurchaseRequestV2>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_purchase_status)
+        setContentView(R.layout.activity_purchase_status_improved)
 
         supportActionBar?.title = "구매신청 현황"
 
+        googleAuthHelper = GoogleAuthHelper(this)
+        fcmHelper = FcmNotificationHelper(this)
+        currentUser = googleAuthHelper.getCurrentUser()
+
         initViews()
-        loadPendingRequestsFromApi()
+        setupChips()
+        setupRecyclerView()
+        loadRequests()
     }
 
     private fun initViews() {
-        lvPendingRequests = findViewById(R.id.lvPendingRequests)
+        chipGroupStatus = findViewById(R.id.chipGroupStatus)
+        rvRequests = findViewById(R.id.rvRequests)
+        progressBar = findViewById(R.id.progressBar)
+        llEmptyState = findViewById(R.id.llEmptyState)
+        fabRefresh = findViewById(R.id.fabRefresh)
+
+        // 관리자만 새로고침 버튼 표시
+        fabRefresh.visibility = if (currentUser?.isAdmin == true) View.VISIBLE else View.GONE
+        fabRefresh.setOnClickListener {
+            loadRequests()
+        }
     }
 
-    private fun loadPendingRequestsFromApi() {
+    private fun setupChips() {
+        chipGroupStatus.setOnCheckedChangeListener { _, checkedId ->
+            selectedStatus = when (checkedId) {
+                R.id.chipAll -> "전체"
+                R.id.chipPending -> PurchaseStatus.PENDING.displayName
+                R.id.chipConfirmed -> PurchaseStatus.CONFIRMED.displayName
+                R.id.chipInApproval -> PurchaseStatus.IN_APPROVAL.displayName
+                R.id.chipApproved -> PurchaseStatus.APPROVED.displayName
+                R.id.chipPreProcessed -> PurchaseStatus.PRE_PROCESSED.displayName
+                R.id.chipCompleted -> PurchaseStatus.COMPLETED.displayName
+                else -> "전체"
+            }
+            loadRequests()
+        }
+    }
+
+    private fun setupRecyclerView() {
+        requestAdapter = PurchaseRequestAdapterV2(
+            requestList,
+            currentUser,
+            onItemClick = { request ->
+                if (currentUser?.isAdmin == true) {
+                    showStatusChangeDialog(request)
+                } else if (request.applicantEmail == currentUser?.email && request.isModifiable()) {
+                    showModifyDialog(request)
+                }
+            },
+            onEditClick = { request ->
+                if (request.applicantEmail == currentUser?.email && request.isModifiable()) {
+                    openEditActivity(request)
+                }
+            }
+        )
+
+        rvRequests.apply {
+            layoutManager = LinearLayoutManager(this@PurchaseStatusActivityV2)
+            adapter = requestAdapter
+        }
+    }
+
+    private fun loadRequests() {
+        progressBar.visibility = View.VISIBLE
+        llEmptyState.visibility = View.GONE
+
         lifecycleScope.launch {
             try {
-                val requests = RetrofitClient.api.getPurchaseRequests()
-                runOnUiThread {
-                    adapter = PurchaseRequestAdapter(this@PurchaseStatusActivity, requests) { request ->
-                        // 아이템 클릭 시 다이얼로그 보여주기
-                        showStatusUpdateDialog(request)
-                    }
-                    lvPendingRequests.adapter = adapter
+                var query: Query = db.collection("purchaseRequests")
+                    .orderBy("requestDate", Query.Direction.DESCENDING)
+
+                // 상태 필터링
+                if (selectedStatus != "전체") {
+                    query = query.whereEqualTo("status", selectedStatus)
                 }
+
+                val snapshot = query.get().await()
+
+                requestList.clear()
+                for (doc in snapshot.documents) {
+                    val request = PurchaseRequestV2.fromFirebaseDocument(
+                        doc.id,
+                        doc.data ?: emptyMap()
+                    )
+                    requestList.add(request)
+                }
+
+                requestAdapter.notifyDataSetChanged()
+
+                if (requestList.isEmpty()) {
+                    llEmptyState.visibility = View.VISIBLE
+                }
+
             } catch (e: Exception) {
-                Toast.makeText(this@PurchaseStatusActivity, "데이터 불러오기 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@PurchaseStatusActivityV2,
+                    "데이터 로드 실패: ${e.message}",
+                    Toast.LENGTH_SHORT).show()
+            } finally {
+                progressBar.visibility = View.GONE
             }
         }
     }
 
-    private fun showStatusUpdateDialog(request: PurchaseRequest) {
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("구매신청 처리")
-        builder.setMessage("""
-            ${request.applicantName}님의 구매신청을 어떻게 처리하시겠습니까?
-            
-            🔧 장비: ${request.applicantDepartment}
-            📍 장소: ${request.location}
-            📝 용도: ${request.purpose}
-            
-            ⚠️ 실제 승인/거부는 Google Sheets에서 처리하는 것을 권장합니다.
-        """.trimIndent())
+    private fun showStatusChangeDialog(request: PurchaseRequestV2) {
+        val currentStatus = PurchaseStatus.fromString(request.status)
+        val nextStatuses = PurchaseStatus.getAllAdminStatuses()
 
-        builder.setPositiveButton("✅ 완료") { _, _ ->
-            // 여기선 로컬 DB 업데이트 함수 호출하거나, 서버 API 호출할 수 있음
-            // 예시: dbHelper.updateRequestStatus(request.id, "완료")
-            Toast.makeText(this, "완료 처리 되었습니다", Toast.LENGTH_SHORT).show()
-            loadPendingRequestsFromApi() // 목록 새로고침
+        val statusNames = nextStatuses.map { "${it.emoji} ${it.displayName}" }.toTypedArray()
+
+        AlertDialog.Builder(this)
+            .setTitle("상태 변경")
+            .setItems(statusNames) { _, which ->
+                val newStatus = nextStatuses[which]
+                updateRequestStatus(request, newStatus)
+            }
+            .setNegativeButton("취소", null)
+            .show()
+    }
+
+    private fun updateRequestStatus(request: PurchaseRequestV2, newStatus: PurchaseStatus) {
+        lifecycleScope.launch {
+            try {
+                val updates = hashMapOf<String, Any>(
+                    "status" to newStatus.displayName,
+                    "processor" to (currentUser?.name ?: "관리자"),
+                    "processedDate" to java.text.SimpleDateFormat(
+                        "yyyy-MM-dd HH:mm:ss",
+                        java.util.Locale.KOREA
+                    ).format(java.util.Date())
+                )
+
+                db.collection("purchaseRequests")
+                    .document(request.requestId)
+                    .update(updates)
+                    .await()
+
+                // 신청자에게 알림
+                fcmHelper.notifyRequesterStatusChanged(
+                    request.applicantEmail,
+                    request.equipmentName,
+                    request.status,
+                    newStatus.displayName,
+                    request.requestId
+                )
+
+                Toast.makeText(this@PurchaseStatusActivityV2,
+                    "상태가 변경되었습니다",
+                    Toast.LENGTH_SHORT).show()
+
+                loadRequests()
+
+            } catch (e: Exception) {
+                Toast.makeText(this@PurchaseStatusActivityV2,
+                    "상태 변경 실패: ${e.message}",
+                    Toast.LENGTH_SHORT).show()
+            }
         }
+    }
 
-        builder.setNegativeButton("❌ 거부") { _, _ ->
-            // 예시: dbHelper.updateRequestStatus(request.id, "거부")
-            Toast.makeText(this, "거부 처리 되었습니다", Toast.LENGTH_SHORT).show()
-            loadPendingRequestsFromApi()
+    private fun showModifyDialog(request: PurchaseRequestV2) {
+        AlertDialog.Builder(this)
+            .setTitle("구매신청 수정")
+            .setMessage("이 구매신청을 수정하시겠습니까?")
+            .setPositiveButton("수정") { _, _ ->
+                openEditActivity(request)
+            }
+            .setNegativeButton("취소", null)
+            .show()
+    }
+
+    private fun openEditActivity(request: PurchaseRequestV2) {
+        val intent = Intent(this, EditPurchaseRequestActivity::class.java).apply {
+            putExtra(EditPurchaseRequestActivity.EXTRA_REQUEST_ID, request.requestId)
+            putExtra(EditPurchaseRequestActivity.EXTRA_REQUEST_DATA, request)
         }
+        startActivityForResult(intent, 100)
+    }
 
-        builder.setNeutralButton("취소", null)
-
-        builder.show()
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 100 && resultCode == RESULT_OK) {
+            loadRequests()
+        }
     }
 
     override fun onResume() {
         super.onResume()
-        loadPendingRequestsFromApi() // 화면으로 돌아올 때마다 새로고침
+        loadRequests()
     }
 }

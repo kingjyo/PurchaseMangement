@@ -1,13 +1,17 @@
-package com.accompany.purchaseManagement // ← 패키지명 맞게 수정
+package com.accompany.PurchaseManagement
+
+import com.google.gson.annotations.SerializedName
 
 data class Cattle(
-    val managementNumber: String, // 관리번호
-    val id: String,               // 개체번호
-    val birthDate: String,        // 생년월일
-    val ageMonths: Int,           // 월령
-    val category: String,         // 개체구분
-    val sex: String,              // 성별
-    val weight: Float?,           // 체중 (nullable)
-    val barn: String,             // 축사
-    val status: String?           // 상태 (nullable)
+    @SerializedName("관리번호") val id: String,
+    @SerializedName("개체번호") val tagNumber: String,
+    @SerializedName("이표번호") val eartagNumber: String? = null,
+    @SerializedName("생년월일") val birthDate: String,
+    @SerializedName("월령") val monthAge: Int,
+    @SerializedName("개체구분") val type: String,
+    @SerializedName("성별") val gender: String,
+    @SerializedName("체중") val weight: Float? = null,
+    @SerializedName("축사") val barn: String,
+    @SerializedName("상태") val status: String? = null
 )
+

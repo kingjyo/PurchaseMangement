@@ -1,195 +1,154 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="16dp"
-    android:background="@drawable/item_background"
     android:layout_margin="8dp"
-    android:elevation="2dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp"
     android:clickable="true"
     android:focusable="true">
 
-    <!-- 헤더: 신청자 + 상태 -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginBottom="12dp"
-        android:gravity="center_vertical">
-
-        <!-- 신청자 정보 -->
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/tvApplicantName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="👤 홍길동"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:textColor="@color/text_primary"
-                android:layout_marginBottom="4dp" />
-
-            <TextView
-                android:id="@+id/tvApplicantDepartment"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="🏢 축산팀"
-                android:textSize="16sp"
-                android:textColor="@color/text_secondary" />
-
-        </LinearLayout>
-
-        <!-- 상태 배지 -->
-        <TextView
-            android:id="@+id/tvStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="대기중"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:background="@drawable/status_background"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="8dp"
-            android:textColor="@color/white"
-            android:elevation="1dp" />
-
-    </LinearLayout>
-
-    <!-- 구분선 -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/divider_light"
-        android:layout_marginBottom="12dp" />
-
-    <!-- 구매 정보 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_marginBottom="12dp">
+        android:padding="16dp">
 
-        <!-- 장비명 (가장 중요) -->
+        <!-- 헤더: 신청자 + 상태 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="8dp">
+            android:layout_marginBottom="12dp"
+            android:gravity="center_vertical">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="🔧"
-                android:textSize="18sp"
-                android:layout_marginEnd="8dp" />
-
-            <TextView
-                android:id="@+id/tvEquipmentName"
+            <!-- 신청자 정보 -->
+            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="사료배합기"
-                android:textSize="18sp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvApplicantName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="홍길동"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary" />
+
+                <TextView
+                    android:id="@+id/tvApplicantDepartment"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="축산팀"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_secondary" />
+
+            </LinearLayout>
+
+            <!-- 상태 표시 -->
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="대기중"
+                android:clickable="false" />
+
+        </LinearLayout>
+
+        <!-- 구분선 -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/divider_light"
+            android:layout_marginBottom="12dp" />
+
+        <!-- 구매 정보 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- 장비명 + 수량 -->
+            <TextView
+                android:id="@+id/tvEquipmentInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🔧 사료배합기 (2개)"
+                android:textSize="16sp"
                 android:textStyle="bold"
-                android:textColor="@color/text_primary" />
+                android:textColor="@color/text_primary"
+                android:layout_marginBottom="8dp" />
 
-        </LinearLayout>
-
-        <!-- 장소 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="8dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="📍"
-                android:textSize="16sp"
-                android:layout_marginEnd="8dp" />
-
-            <TextView
-                android:id="@+id/tvLocation"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="1번 축사"
-                android:textSize="16sp"
-                android:textColor="@color/text_secondary" />
-
-        </LinearLayout>
-
-        <!-- 용도 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="📝"
-                android:textSize="16sp"
-                android:layout_marginEnd="8dp" />
-
+            <!-- 용도 -->
             <TextView
                 android:id="@+id/tvPurpose"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📝 사료 배합 작업"
+                android:textSize="14sp"
+                android:textColor="@color/text_secondary"
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:layout_marginBottom="8dp" />
+
+            <!-- 장소 (있을 경우만) -->
+            <TextView
+                android:id="@+id/tvLocation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📍 1번 축사"
+                android:textSize="14sp"
+                android:textColor="@color/text_secondary"
+                android:visibility="gone"
+                android:layout_marginBottom="8dp" />
+
+        </LinearLayout>
+
+        <!-- 하단 정보 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="8dp">
+
+            <!-- 신청일시 -->
+            <TextView
+                android:id="@+id/tvRequestDate"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="사료 배합 작업"
-                android:textSize="16sp"
-                android:textColor="@color/text_secondary"
-                android:maxLines="2"
-                android:ellipsize="end" />
+                android:text="🕐 06/07 14:30"
+                android:textSize="12sp"
+                android:textColor="@color/text_hint" />
+
+            <!-- 사진 표시 -->
+            <TextView
+                android:id="@+id/tvPhotoCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📸 3"
+                android:textSize="12sp"
+                android:textColor="@color/text_hint"
+                android:visibility="gone"
+                android:layout_marginEnd="12dp" />
+
+            <!-- 수정 버튼 (신청자 본인만) -->
+            <ImageButton
+                android:id="@+id/btnEdit"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_edit"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:tint="@color/primary_color"
+                android:visibility="gone" />
 
         </LinearLayout>
 
     </LinearLayout>
 
-    <!-- 하단: 신청일시 -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="🕐"
-            android:textSize="14sp"
-            android:layout_marginEnd="8dp" />
-
-        <TextView
-            android:id="@+id/tvRequestDate"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="06/07 14:30"
-            android:textSize="14sp"
-            android:textColor="@color/text_hint" />
-
-        <!-- 터치 안내 (클릭 가능한 경우만) -->
-        <TextView
-            android:id="@+id/tvClickHint"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="👆 터치하여 처리"
-            android:textSize="12sp"
-            android:textColor="@color/accent_color"
-            android:background="@drawable/hint_background"
-            android:paddingHorizontal="8dp"
-            android:paddingVertical="4dp"
-            android:visibility="gone" />
-
-    </LinearLayout>
-
-</LinearLayout>
+</com.google.android.material.card.MaterialCardView>

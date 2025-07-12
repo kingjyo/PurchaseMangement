@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:gravity="center">
+
+    <!-- 아이콘 -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="📍"
+        android:textSize="64sp"
+        android:layout_marginBottom="24dp" />
+
+    <!-- 제목 -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="사용 장소 / 장비"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="@color/text_primary"
+        android:layout_marginBottom="8dp" />
+
+    <!-- 선택사항 표시 -->
+    <com.google.android.material.chip.Chip
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="선택사항"
+        android:clickable="false"
+        android:layout_marginBottom="16dp"
+        app:chipBackgroundColor="@color/chip_optional_bg"
+        app:chipStrokeColor="@color/chip_optional_stroke"
+        app:chipStrokeWidth="1dp" />
+
+    <!-- 설명 -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="어디에서 사용하실 예정인가요?"
+        android:textSize="16sp"
+        android:textColor="@color/text_secondary"
+        android:layout_marginBottom="32dp" />
+
+    <!-- 입력 필드 -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        app:boxStrokeColor="@color/primary_color"
+        app:hintTextColor="@color/primary_color">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etLocation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="예: 1번 축사, 트랙터 3호기"
+            android:inputType="text"
+            android:textSize="20sp"
+            android:padding="16dp" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- 선택사항 안내 -->
+    <TextView
+        android:id="@+id/tvOptional"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="💡 선택사항입니다. 필요하신 경우만 입력해주세요."
+        android:textSize="14sp"
+        android:textColor="@color/text_hint"
+        android:padding="12dp"
+        android:background="@drawable/optional_info_background"
+        android:layout_marginTop="8dp" />
+
+</LinearLayout>

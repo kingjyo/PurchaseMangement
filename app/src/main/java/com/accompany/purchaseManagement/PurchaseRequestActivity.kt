@@ -2,350 +2,277 @@ package com.accompany.purchaseManagement
 
 import android.app.Activity
 import android.content.Intent
-import android.graphics.Bitmap
-import android.Manifest
-import android.content.pm.PackageManager
-import androidx.core.content.ContextCompat
-import androidx.core.app.ActivityCompat
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.provider.MediaStore
+import android.view.View
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
-import android.graphics.ImageDecoder
-import android.os.Build
-import androidx.appcompat.app.AlertDialog
-import androidx.core.content.FileProvider
-import com.google.firebase.storage.FirebaseStorage
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import kotlinx.coroutines.tasks.await
-import com.accompany.purchaseManagement.FirestoreHelper
 
-
-class PurchaseRequestActivity : AppCompatActivity() {
-
-    private lateinit var etApplicantName: EditText
-    private lateinit var etApplicantDepartment: EditText
-    private lateinit var etEquipmentName: EditText
-    private lateinit var etLocation: EditText
-    private lateinit var etPurpose: EditText
-    private lateinit var etNote: EditText
-    private lateinit var ivPhoto: ImageView
-    private lateinit var btnTakePhoto: Button
-    private lateinit var btnSubmit: Button
-    private lateinit var tvRequestDate: TextView
-    private val selectedPhotoUris = mutableListOf<Uri>()
-    private suspend fun uploadPhotosToFirebase(uris: List<Uri>): List<String> = withContext(Dispatchers.IO) {
-        val storage = FirebaseStorage.getInstance()
-        val urls = mutableListOf<String>()
-        for (uri in uris) {
-            val filename = "purchase_photos/${System.currentTimeMillis()}_${(0..9999).random()}.jpg"
-            val ref = storage.reference.child(filename)
-            ref.putFile(uri).await() // kotlinx-coroutines-play-services 필요
-            val url = ref.downloadUrl.await().toString()
-            urls.add(url)
-        }
-        urls
-    }
-
-    private var tempCameraUri: Uri? = null
-    private lateinit var dbHelper: PurchaseRequestDbHelper
+class PurchaseRequestActivityV2 : AppCompatActivity() {
 
     companion object {
         private const val REQUEST_IMAGE_CAPTURE = 1
         private const val REQUEST_IMAGE_PICK = 2
     }
 
+    // ViewPager 관련
+    private lateinit var viewPager: ViewPager2
+    private lateinit var tabLayout: TabLayout
+    private lateinit var btnPrevious: Button
+    private lateinit var btnNext: Button
+    private lateinit var progressBar: ProgressBar
+
+    // 사용자 정보
+    private lateinit var googleAuthHelper: GoogleAuthHelper
+    private var currentUser: GoogleAuthHelper.UserInfo? = null
+
+    // 입력 데이터
+    private var equipmentName = ""
+    private var quantity = "1"
+    private var location = ""
+    private var purpose = ""
+    private var note = ""
+    private val photoUris = mutableListOf<Uri>()
+
+    // Firebase
+    private val db = FirebaseFirestore.getInstance()
+    private val storage = FirebaseStorage.getInstance()
+    private lateinit var dbHelper: PurchaseRequestDbHelper
+    private lateinit var fcmHelper: FcmNotificationHelper
+    private lateinit var emailHelper: EmailHelper
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_purchase_request)
+        setContentView(R.layout.activity_purchase_request_v2)
+
+        supportActionBar?.title = "구매신청"
+
+        // 초기화
+        googleAuthHelper = GoogleAuthHelper(this)
+        currentUser = googleAuthHelper.getCurrentUser()
+        dbHelper = PurchaseRequestDbHelper(this)
+        fcmHelper = FcmNotificationHelper(this)
+        emailHelper = EmailHelper(this)
 
         initViews()
-        setupDateDisplay()
-        setupClickListeners()
-
-        dbHelper = PurchaseRequestDbHelper(this)
+        setupViewPager()
     }
 
     private fun initViews() {
-        etApplicantName = findViewById(R.id.etApplicantName)
-        etApplicantDepartment = findViewById(R.id.etApplicantDepartment)
-        etEquipmentName = findViewById(R.id.etEquipmentName)
-        etLocation = findViewById(R.id.etLocation)
-        etPurpose = findViewById(R.id.etPurpose)
-        etNote = findViewById(R.id.etNote)
-        ivPhoto = findViewById(R.id.ivPhoto)
-        btnTakePhoto = findViewById(R.id.btnTakePhoto)
-        btnSubmit = findViewById(R.id.btnSubmit)
-        tvRequestDate = findViewById(R.id.tvRequestDate)
-    }
+        viewPager = findViewById(R.id.viewPager)
+        tabLayout = findViewById(R.id.tabLayout)
+        btnPrevious = findViewById(R.id.btnPrevious)
+        btnNext = findViewById(R.id.btnNext)
+        progressBar = findViewById(R.id.progressBar)
 
-    private fun setupDateDisplay() {
-        val currentDate = SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREA).format(Date())
-        tvRequestDate.text = "구매신청일: $currentDate"
-    }
-
-    private fun setupClickListeners() {
-        btnTakePhoto.setOnClickListener {
-            val options = arrayOf("사진 촬영", "갤러리에서 선택")
-            val builder = AlertDialog.Builder(this)
-            builder.setTitle("사진 첨부 방식 선택")
-            builder.setItems(options) { _, which ->
-                when (which) {
-                    0 -> checkCameraPermissionAndOpenCamera()
-                    1 -> openGallery()
-                }
+        btnPrevious.setOnClickListener {
+            if (viewPager.currentItem > 0) {
+                viewPager.currentItem = viewPager.currentItem - 1
             }
-            builder.show()
         }
 
-        btnSubmit.setOnClickListener {
-            submitPurchaseRequest()
-        }
-    }
-
-    // 카메라 권한 체크 후 촬영
-    private fun checkCameraPermissionAndOpenCamera() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-            != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), 100)
-        } else {
-            openCamera()
-        }
-    }
-
-    private fun openCamera() {
-        val photoFile = createImageFile()
-        tempCameraUri = FileProvider.getUriForFile(
-            this,
-            "${packageName}.fileprovider",
-            photoFile
-        )
-        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
-            putExtra(MediaStore.EXTRA_OUTPUT, tempCameraUri)
-        }
-        startActivityForResult(intent, REQUEST_IMAGE_CAPTURE)
-    }
-
-
-    // 카메라 촬영
-    private fun createImageFile(): File {
-        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.KOREA).format(Date())
-        val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-        return File.createTempFile("IMG_${timeStamp}_", ".jpg", storageDir)
-    }
-
-    // 갤러리에서 선택
-    private fun openGallery() {
-        val intent = Intent(Intent.ACTION_GET_CONTENT)
-        intent.type = "image/*"
-        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-        startActivityForResult(Intent.createChooser(intent, "사진 선택"), REQUEST_IMAGE_PICK)
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode != Activity.RESULT_OK) return
-
-        when (requestCode) {
-            REQUEST_IMAGE_CAPTURE -> {
-                tempCameraUri?.let { selectedPhotoUris.add(it) }
-            }
-            REQUEST_IMAGE_PICK -> {
-                data?.let {
-                    val clipData = it.clipData
-                    if (clipData != null) {
-                        for (i in 0 until clipData.itemCount) {
-                            selectedPhotoUris.add(clipData.getItemAt(i).uri)
-                        }
-                    } else {
-                        it.data?.let { uri -> selectedPhotoUris.add(uri) }
-                    }
+        btnNext.setOnClickListener {
+            if (validateCurrentPage()) {
+                if (viewPager.currentItem < 5) { // 총 6페이지
+                    viewPager.currentItem = viewPager.currentItem + 1
+                } else {
+                    submitPurchaseRequest()
                 }
             }
         }
-        // 한 장만 미리보기
-        if (selectedPhotoUris.isNotEmpty()) {
-            ivPhoto.setImageURI(selectedPhotoUris[0])
-        }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
     }
 
-    // ... (생략: createImageFile, onRequestPermissionsResult 등)
+    private fun setupViewPager() {
+        val adapter = PurchaseRequestPagerAdapter(this)
+        viewPager.adapter = adapter
+
+        // 탭 설정
+        TabLayoutMediator(tabLayout, viewPager) { tab, position ->
+            tab.text = when (position) {
+                0 -> "장비명"
+                1 -> "수량"
+                2 -> "장소"
+                3 -> "용도"
+                4 -> "기타"
+                5 -> "사진"
+                else -> ""
+            }
+        }.attach()
+
+        // 페이지 변경 리스너
+        viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                updateButtons(position)
+            }
+        })
+    }
+
+    private fun updateButtons(position: Int) {
+        // 이전 버튼
+        btnPrevious.visibility = if (position > 0) View.VISIBLE else View.INVISIBLE
+
+        // 다음 버튼 텍스트
+        btnNext.text = when (position) {
+            5 -> "제출"
+            2, 4, 5 -> "다음 (선택사항)"
+            else -> "다음"
+        }
+    }
+
+    private fun validateCurrentPage(): Boolean {
+        return when (viewPager.currentItem) {
+            0 -> { // 장비명
+                val fragment = supportFragmentManager.findFragmentByTag("f${viewPager.currentItem}")
+                        as? EquipmentNameFragment
+                equipmentName = fragment?.getEquipmentName() ?: ""
+                if (equipmentName.isEmpty()) {
+                    Toast.makeText(this, "장비명을 입력해주세요", Toast.LENGTH_SHORT).show()
+                    false
+                } else true
+            }
+            1 -> { // 수량
+                val fragment = supportFragmentManager.findFragmentByTag("f${viewPager.currentItem}")
+                        as? QuantityFragment
+                quantity = fragment?.getQuantity() ?: "1"
+                if (quantity.isEmpty() || quantity.toIntOrNull() == null || quantity.toInt() <= 0) {
+                    Toast.makeText(this, "올바른 수량을 입력해주세요", Toast.LENGTH_SHORT).show()
+                    false
+                } else true
+            }
+            2 -> { // 장소 (선택)
+                val fragment = supportFragmentManager.findFragmentByTag("f${viewPager.currentItem}")
+                        as? LocationFragment
+                location = fragment?.getLocation() ?: ""
+                true
+            }
+            3 -> { // 용도
+                val fragment = supportFragmentManager.findFragmentByTag("f${viewPager.currentItem}")
+                        as? PurposeFragment
+                purpose = fragment?.getPurpose() ?: ""
+                if (purpose.isEmpty()) {
+                    Toast.makeText(this, "사용 용도를 입력해주세요", Toast.LENGTH_SHORT).show()
+                    false
+                } else true
+            }
+            4 -> { // 기타사항 (선택)
+                val fragment = supportFragmentManager.findFragmentByTag("f${viewPager.currentItem}")
+                        as? NoteFragment
+                note = fragment?.getNote() ?: ""
+                true
+            }
+            5 -> { // 사진 (선택)
+                val fragment = supportFragmentManager.findFragmentByTag("f${viewPager.currentItem}")
+                        as? PhotoFragment
+                photoUris.clear()
+                photoUris.addAll(fragment?.getPhotoUris() ?: emptyList())
+                true
+            }
+            else -> true
+        }
+    }
 
     private fun submitPurchaseRequest() {
-        val applicantName = etApplicantName.text.toString().trim()
-        val applicantDepartment = etApplicantDepartment.text.toString().trim()
-        val equipmentName = etEquipmentName.text.toString().trim()
-        val location = etLocation.text.toString().trim()
-        val purpose = etPurpose.text.toString().trim()
-        val note = etNote.text.toString().trim()
-        val requestDate = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.KOREA).format(Date())
-
-        if (applicantName.isEmpty() || applicantDepartment.isEmpty() ||
-            equipmentName.isEmpty() || location.isEmpty() || purpose.isEmpty()) {
-            Toast.makeText(this, "필수 정보를 모두 입력해주세요", Toast.LENGTH_SHORT).show()
+        // 사용자 정보 확인
+        if (currentUser == null) {
+            Toast.makeText(this, "로그인 정보를 확인할 수 없습니다", Toast.LENGTH_SHORT).show()
             return
         }
 
-        btnSubmit.isEnabled = false
-        btnSubmit.text = "전송 중..."
+        // 최종 확인 다이얼로그
+        showSubmitConfirmDialog()
+    }
+
+    private fun showSubmitConfirmDialog() {
+        val message = """
+            📋 구매신청 내용 확인
+            
+            👤 신청자: ${currentUser?.name} (${currentUser?.department})
+            🔧 장비명: $equipmentName
+            🔢 수량: $quantity
+            ${if (location.isNotEmpty()) "📍 장소: $location\n" else ""}
+            📝 용도: $purpose
+            ${if (note.isNotEmpty()) "💬 기타: $note\n" else ""}
+            📸 사진: ${photoUris.size}장
+            
+            위 내용으로 구매신청을 제출하시겠습니까?
+        """.trimIndent()
+
+        AlertDialog.Builder(this)
+            .setTitle("구매신청 확인")
+            .setMessage(message)
+            .setPositiveButton("제출") { _, _ ->
+                performSubmit()
+            }
+            .setNegativeButton("취소", null)
+            .show()
+    }
+
+// PurchaseRequestActivityV2_Part1.kt에서 이어서...
+
+    private fun performSubmit() {
+        btnNext.isEnabled = false
+        progressBar.visibility = View.VISIBLE
+
+        val applicantName = currentUser?.name ?: "미설정"
+        val applicantDepartment = currentUser?.department ?: "미설정"
+        val applicantEmail = currentUser?.email ?: ""
+        val requestDate = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.KOREA).format(Date())
 
         lifecycleScope.launch {
             try {
-                // 1. 로컬 DB 저장 (오프라인 대응)
-                val localSuccess = dbHelper.insertPurchaseRequest(
-                    applicantName, applicantDepartment, equipmentName,
-                    location, purpose, note, requestDate, "대기중"
+                // 1. 사진 업로드 (있을 경우)
+                val photoUrls = if (photoUris.isNotEmpty()) {
+                    uploadPhotos(photoUris)
+                } else {
+                    emptyList()
+                }
+
+                // 2. Firestore에 저장
+                val requestData = hashMapOf(
+                    "applicantName" to applicantName,
+                    "applicantDepartment" to applicantDepartment,
+                    "applicantEmail" to applicantEmail,
+                    "equipmentName" to equipmentName,
+                    "quantity" to quantity,
+                    "location" to location,
+                    "purpose" to purpose,
+                    "note" to note,
+                    "photoUrls" to photoUrls,
+                    "requestDate" to requestDate,
+                    "status" to PurchaseStatus.PENDING.displayName,
+                    "modifyCount" to 0
                 )
 
-                // 2. 사진 업로드 (Storage)
-                val photoUrls = uploadPhotosToFirebase(selectedPhotoUris) // List<String>
+                val docRef = db.collection("purchaseRequests")
+                    .add(requestData)
+                    .await()
 
-                // 3. Google Sheets 저장 (원래 있던 방식)
-                val googleSheetsHelper = GoogleSheetsHelper(this@PurchaseRequestActivity)
+                val requestId = docRef.id
+
+                // 3. 로컬 DB 저장 (백업)
+                dbHelper.insertPurchaseRequest(
+                    applicantName, applicantDepartment, equipmentName,
+                    location, purpose, note, requestDate, PurchaseStatus.PENDING.displayName
+                )
+
+                // 4. Google Sheets 저장
+                val googleSheetsHelper = GoogleSheetsHelper(this@PurchaseRequestActivityV2)
                 val sheetsSuccess = googleSheetsHelper.submitToGoogleSheets(
                     applicantName, applicantDepartment, equipmentName,
                     location, purpose, note, requestDate,
@@ -353,134 +280,127 @@ class PurchaseRequestActivity : AppCompatActivity() {
                     photoUrls = photoUrls.joinToString(",")
                 )
 
-                // 4. 이메일 전송 (필요 시)
-                if (photoUrls.isNotEmpty()) {
-                    sendPhotosByEmail(
-                        applicantName, applicantDepartment, equipmentName,
-                        location, purpose, requestDate, selectedPhotoUris
-                    )
-                }
-
-                // 5. **Firestore 저장 (최신 추가!)**
-                val firestoreData = mapOf(
-                    "applicantName" to applicantName,
-                    "applicantDepartment" to applicantDepartment,
-                    "equipmentName" to equipmentName,
-                    "location" to location,
-                    "purpose" to purpose,
-                    "note" to note,
-                    "requestDate" to requestDate,
-                    "photoUrls" to photoUrls,
-                    "status" to "대기중"
+                // 5. 이메일 전송
+                emailHelper.sendPurchaseRequestEmail(
+                    applicantName, applicantDepartment, equipmentName,
+                    quantity, location, purpose, note, requestDate, photoUrls
                 )
-                FirestoreHelper.savePurchaseRequest(firestoreData)
 
-                // ===> 성공/실패 분기 메시지 처리
-                when {
-                    sheetsSuccess -> {
-                        val message = if (photoUrls.isNotEmpty()) {
-                            "✅ 구매신청이 완료되었습니다!\n📊 신청내역: Google Sheets에 실시간 저장\n📸 사진: 이메일로 전송됨"
-                        } else {
-                            "✅ 구매신청이 완료되었습니다!\n관리자가 실시간으로 확인할 수 있습니다."
-                        }
-                        Toast.makeText(this@PurchaseRequestActivity, message, Toast.LENGTH_LONG).show()
-                        clearInputFields()
-                        btnSubmit.postDelayed({ finish() }, 2000)
-                    }
-                    localSuccess -> {
-                        Toast.makeText(
-                            this@PurchaseRequestActivity,
-                            "⚠️ 구매신청은 저장되었지만\n인터넷 연결을 확인해주세요.\n나중에 다시 시도하거나 관리자에게 알려주세요.",
-                            Toast.LENGTH_LONG
-                        ).show()
-                        clearInputFields()
-                        finish()
-                    }
-                    else -> {
-                        Toast.makeText(
-                            this@PurchaseRequestActivity,
-                            "❌ 저장 중 오류가 발생했습니다.\n다시 시도해주세요.",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
+                // 6. 관리자에게 FCM 알림
+                fcmHelper.notifyAdminNewRequest(
+                    applicantName, equipmentName, requestId
+                )
+
+                // 성공 처리
+                showSuccessDialog()
 
             } catch (e: Exception) {
-                Toast.makeText(this@PurchaseRequestActivity, "오류 발생: 인터넷 연결을 확인해주세요", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this@PurchaseRequestActivityV2,
+                    "제출 중 오류가 발생했습니다: ${e.message}",
+                    Toast.LENGTH_LONG
+                ).show()
             } finally {
-                btnSubmit.isEnabled = true
-                btnSubmit.text = "구매신청 제출"
+                btnNext.isEnabled = true
+                progressBar.visibility = View.GONE
             }
         }
     }
 
+    private suspend fun uploadPhotos(uris: List<Uri>): List<String> {
+        val urls = mutableListOf<String>()
 
-    // ✅ 여러 장 이메일 첨부 (photoBitmap, photoFile 완전 제거)
-    private fun sendPhotosByEmail(
-        applicantName: String,
-        applicantDepartment: String,
-        equipmentName: String,
-        location: String,
-        purpose: String,
-        requestDate: String,
-        photoUris: List<Uri>
-    ) {
-        try {
-            val managerEmail = AppConfig.MANAGER_EMAIL
-            val subject = "[구매신청-사진] $applicantName - $equipmentName"
-            val emailBody = """
-                📸 구매신청 첨부사진
-                
-                ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                
-                👤 신청자: $applicantName ($applicantDepartment)
-                🔧 장비/물품: $equipmentName
-                📍 사용 장소: $location
-                📝 사용 용도: $purpose
-                📅 신청일시: $requestDate
-                
-                ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-                
-                💡 본 이메일은 구매신청 사진을 별도로 전송하는 것입니다.
-                📊 신청 내역은 Google Sheets에서 확인하세요.
-                
-                ※ 자동 생성된 이메일입니다.
-            """.trimIndent()
+        for (uri in uris) {
+            val filename = "purchase_photos/${System.currentTimeMillis()}_${(0..9999).random()}.jpg"
+            val ref = storage.reference.child(filename)
 
-            // 여러 장 첨부
-            val emailIntent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
-                type = "image/*"
-                putExtra(Intent.EXTRA_EMAIL, arrayOf(managerEmail))
-                putExtra(Intent.EXTRA_SUBJECT, subject)
-                putExtra(Intent.EXTRA_TEXT, emailBody)
-                putParcelableArrayListExtra(
-                    Intent.EXTRA_STREAM,
-                    ArrayList(photoUris)
-                )
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            ref.putFile(uri).await()
+            val url = ref.downloadUrl.await().toString()
+            urls.add(url)
+        }
+
+        return urls
+    }
+
+    private fun showSuccessDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("✅ 구매신청 완료")
+            .setMessage("""
+                구매신청이 성공적으로 제출되었습니다!
+                
+                📊 관리자가 실시간으로 확인할 수 있습니다
+                📧 상세 내용이 이메일로 전송되었습니다
+                
+                구매신청 현황에서 진행상황을 확인하세요.
+            """.trimIndent())
+            .setPositiveButton("확인") { _, _ ->
+                setResult(Activity.RESULT_OK)
+                finish()
             }
+            .setCancelable(false)
+            .show()
+    }
 
-            startActivity(Intent.createChooser(emailIntent, "사진을 이메일로 전송"))
+    // 카메라/갤러리 관련 메서드들
+    fun openCamera() {
+        val photoFile = createImageFile()
+        val photoUri = FileProvider.getUriForFile(
+            this,
+            "${packageName}.fileprovider",
+            photoFile
+        )
+        photoUris.add(photoUri)
 
-        } catch (e: Exception) {
-            Toast.makeText(this, "이메일 전송 준비 중 오류: ${e.message}", Toast.LENGTH_SHORT).show()
+        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
+            putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+        }
+        startActivityForResult(intent, REQUEST_IMAGE_CAPTURE)
+    }
+
+    fun openGallery() {
+        val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+            type = "image/*"
+            putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+        }
+        startActivityForResult(Intent.createChooser(intent, "사진 선택"), REQUEST_IMAGE_PICK)
+    }
+
+    private fun createImageFile(): File {
+        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.KOREA).format(Date())
+        val storageDir = getExternalFilesDir(android.os.Environment.DIRECTORY_PICTURES)
+        return File.createTempFile("IMG_${timeStamp}_", ".jpg", storageDir)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (resultCode != Activity.RESULT_OK) return
+
+        when (requestCode) {
+            REQUEST_IMAGE_CAPTURE -> {
+                // PhotoFragment에 전달
+                val fragment = supportFragmentManager.findFragmentByTag("f5") as? PhotoFragment
+                fragment?.onPhotoAdded()
+            }
+            REQUEST_IMAGE_PICK -> {
+                data?.let {
+                    if (it.clipData != null) {
+                        for (i in 0 until it.clipData!!.itemCount) {
+                            photoUris.add(it.clipData!!.getItemAt(i).uri)
+                        }
+                    } else {
+                        it.data?.let { uri -> photoUris.add(uri) }
+                    }
+
+                    val fragment = supportFragmentManager.findFragmentByTag("f5") as? PhotoFragment
+                    fragment?.onPhotoAdded()
+                }
+            }
         }
     }
-    private fun clearInputFields() {
-        etApplicantName.text.clear()
-        etApplicantDepartment.text.clear()
-        etEquipmentName.text.clear()
-        etLocation.text.clear()
-        etPurpose.text.clear()
-        etNote.text.clear()
-        ivPhoto.setImageDrawable(null)
-
-        // 포커스를 첫 번째 입력창으로
-        etApplicantName.requestFocus()
-
-    // ... (clearInputFields 등 기존 메서드 유지)
 }
 
-
-
-    }
+// 전체 코드를 합치려면:
+// 1. PurchaseRequestActivityV2_Part1.kt의 내용을 복사
+// 2. "// PurchaseRequestActivityV2_Part2.kt에서 계속..." 부분을 삭제
+// 3. PurchaseRequestActivityV2_Part2.kt의 내용을 이어서 붙여넣기

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <!-- 상단 정보 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_marginBottom="24dp">
+
+        <!-- 아이콘 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="📸"
+            android:textSize="48sp"
+            android:layout_marginBottom="16dp" />
+
+        <!-- 제목 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="사진 첨부"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="8dp" />
+
+        <!-- 선택사항 표시 -->
+        <com.google.android.material.chip.Chip
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="선택사항"
+            android:clickable="false"
+            app:chipBackgroundColor="@color/chip_optional_bg"
+            app:chipStrokeColor="@color/chip_optional_stroke"
+            app:chipStrokeWidth="1dp" />
+
+    </LinearLayout>
+
+    <!-- 안내 텍스트 -->
+    <TextView
+        android:id="@+id/tvOptional"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="📸 사진 첨부 (선택사항)\n\n• 고장 상황\n• 구매 제품 예시\n• 문제 상황 등\n\n여러 장 첨부 가능합니다."
+        android:textSize="14sp"
+        android:textColor="@color/text_secondary"
+        android:padding="16dp"
+        android:background="@drawable/info_background_light"
+        android:layout_marginBottom="16dp"
+        android:lineSpacingExtra="4dp" />
+
+    <!-- 사진 추가 버튼 -->
+    <Button
+        android:id="@+id/btnAddPhoto"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="사진 추가"
+        android:textSize="16sp"
+        android:drawableStart="@drawable/ic_add_photo"
+        android:drawablePadding="12dp"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_marginBottom="16dp" />
+
+    <!-- 사진 개수 표시 -->
+    <TextView
+        android:id="@+id/tvPhotoCount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="사진이 없습니다"
+        android:textSize="14sp"
+        android:textColor="@color/text_secondary"
+        android:gravity="center"
+        android:layout_marginBottom="16dp" />
+
+    <!-- 사진 미리보기 RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvPhotos"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="4dp"
+        android:clipToPadding="false" />
+
+</LinearLayout>
