@@ -29,11 +29,11 @@ class LoginActivityV2 : AppCompatActivity() {
 
         // 이미 로그인되어 있는지 확인
         if (checkExistingLogin()) {
-            navigateToMain()
+            navigateToMain()  // 이미 로그인되어 있으면 MainActivity로 바로 이동
             return
         }
 
-        setContentView(R.layout.activity_login_v2)
+        setContentView(R.layout.activity_login)
 
         googleAuthHelper = GoogleAuthHelper(this)
         naverAuthHelper = NaverAuthHelper(this)
@@ -45,8 +45,8 @@ class LoginActivityV2 : AppCompatActivity() {
 
     private fun checkExistingLogin(): Boolean {
         val prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE)
-        val email = prefs.getString("userEmail", null)
-        return !email.isNullOrEmpty()
+        val email = prefs.getString("userEmail", null) // 이메일 정보 확인
+        return !email.isNullOrEmpty() // 이메일이 있으면 로그인된 상태
     }
 
     private fun initViews() {
@@ -105,13 +105,16 @@ class LoginActivityV2 : AppCompatActivity() {
                     // 알림 권한 요청
                     fcmHelper.requestNotificationPermission(this@LoginActivityV2)
 
+                    // 사용자 정보를 SharedPreferences에 저장
+                    saveUserInfo(userInfo)
+
                     Toast.makeText(
                         this@LoginActivityV2,
                         "${userInfo.name}님 환영합니다!",
                         Toast.LENGTH_SHORT
                     ).show()
 
-                    navigateToMain()
+                    navigateToMain()  // 로그인 후 MainActivity로 이동
                 }
             },
             onFailure = { error ->
@@ -121,6 +124,15 @@ class LoginActivityV2 : AppCompatActivity() {
                 progressBar.visibility = View.GONE
             }
         )
+    }
+
+    private fun saveUserInfo(userInfo: UserInfo) {
+        val prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE)
+        val editor = prefs.edit()
+        editor.putString("userEmail", userInfo.email)
+        editor.putString("userName", userInfo.name)
+        editor.putBoolean("isLoggedIn", true)  // 로그인 상태를 저장
+        editor.apply()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -144,7 +156,7 @@ class LoginActivityV2 : AppCompatActivity() {
                             Toast.LENGTH_SHORT
                         ).show()
 
-                        navigateToMain()
+                        navigateToMain()  // 로그인 후 MainActivity로 이동
                     }
                 },
                 onFailure = { error ->

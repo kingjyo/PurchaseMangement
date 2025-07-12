@@ -3,14 +3,12 @@ package com.accompany.purchaseManagement
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.ListView
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.firestore.FirebaseFirestore
@@ -21,12 +19,12 @@ import kotlinx.coroutines.tasks.await
 class PurchaseStatusActivityV2 : AppCompatActivity() {
 
     private lateinit var chipGroupStatus: ChipGroup
-    private lateinit var rvRequests: RecyclerView
+    private lateinit var lvRequests: ListView
     private lateinit var progressBar: ProgressBar
     private lateinit var llEmptyState: View
     private lateinit var fabRefresh: FloatingActionButton
 
-    private lateinit var requestAdapter: PurchaseRequestAdapterV2
+    private lateinit var requestAdapter: PurchaseRequestListAdapter
     private val db = FirebaseFirestore.getInstance()
     private lateinit var googleAuthHelper: GoogleAuthHelper
     private lateinit var fcmHelper: FcmNotificationHelper
@@ -47,13 +45,13 @@ class PurchaseStatusActivityV2 : AppCompatActivity() {
 
         initViews()
         setupChips()
-        setupRecyclerView()
+        setupListView()
         loadRequests()
     }
 
     private fun initViews() {
         chipGroupStatus = findViewById(R.id.chipGroupStatus)
-        rvRequests = findViewById(R.id.rvRequests)
+        lvRequests = findViewById(R.id.lvRequests)
         progressBar = findViewById(R.id.progressBar)
         llEmptyState = findViewById(R.id.llEmptyState)
         fabRefresh = findViewById(R.id.fabRefresh)
@@ -81,10 +79,11 @@ class PurchaseStatusActivityV2 : AppCompatActivity() {
         }
     }
 
-    private fun setupRecyclerView() {
-        requestAdapter = PurchaseRequestAdapterV2(
-            requestList,
-            currentUser,
+    private fun setupListView() {
+        requestAdapter = PurchaseRequestListAdapter(
+            context = this,
+            requests = requestList,
+            currentUser = currentUser,
             onItemClick = { request ->
                 if (currentUser?.isAdmin == true) {
                     showStatusChangeDialog(request)
@@ -99,10 +98,7 @@ class PurchaseStatusActivityV2 : AppCompatActivity() {
             }
         )
 
-        rvRequests.apply {
-            layoutManager = LinearLayoutManager(this@PurchaseStatusActivityV2)
-            adapter = requestAdapter
-        }
+        lvRequests.adapter = requestAdapter
     }
 
     private fun loadRequests() {
@@ -206,9 +202,7 @@ class PurchaseStatusActivityV2 : AppCompatActivity() {
         AlertDialog.Builder(this)
             .setTitle("구매신청 수정")
             .setMessage("이 구매신청을 수정하시겠습니까?")
-            .setPositiveButton("수정") { _, _ ->
-                openEditActivity(request)
-            }
+            .setPositiveButton("수정") { _, _ -> openEditActivity(request) }
             .setNegativeButton("취소", null)
             .show()
     }

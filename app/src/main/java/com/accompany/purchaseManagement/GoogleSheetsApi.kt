@@ -1,11 +1,11 @@
 package com.accompany.purchaseManagement
 
+import retrofit2.Call
 import retrofit2.http.GET
-import retrofit2.http.Query
 
 interface GoogleSheetsApi {
     @GET("https://script.google.com/macros/s/AKfycbwrVEWgXV8_hf686Q67jmOU0Dv9Z6iUUsZMYliRyTBavj31NGDYYhwPTIzG6GL3309YjA/exec")  // Apps Script 도메인 URL 넣기
-    suspend fun getPurchaseRequests(): List<purchaseManagement>
+    suspend fun getPurchaseRequests(): List<PurchaseRequestV2>
 }
 
 interface CattleStatusApi {

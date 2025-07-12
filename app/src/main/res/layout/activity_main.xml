@@ -125,6 +125,24 @@
 
             </com.google.android.material.card.MaterialCardView>
 
+            <?xml version="1.0" encoding="utf-8"?>
+            <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="16dp">
+
+                <!-- 네이버 로그인 버튼 -->
+                <com.naver.android.nlogin.widget.OAuthLoginButton
+                    android:id="@+id/naverLoginButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="네이버 로그인"
+                    android:layout_gravity="center" />
+            </LinearLayout>
+
+
             <!-- 관리자 버튼 (관리자만 보임) -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"

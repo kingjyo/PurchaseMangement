@@ -11,16 +11,14 @@ import java.util.*
 
 class PurchaseRequestListAdapter(
     private val context: Context,
-    private val requests: List<PurchaseRequestV2>,
+    private val requests: MutableList<PurchaseRequestV2>,
     private val currentUser: GoogleAuthHelper.UserInfo?,
     private val onItemClick: ((PurchaseRequestV2) -> Unit)? = null,
     private val onEditClick: ((PurchaseRequestV2) -> Unit)? = null
 ) : BaseAdapter() {
 
     override fun getCount() = requests.size
-
     override fun getItem(position: Int) = requests[position]
-
     override fun getItemId(position: Int) = position.toLong()
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {

@@ -22,7 +22,6 @@
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.CAMERA" />
 
-
     <!-- 카메라 하드웨어 (선택사항) -->
     <uses-feature
         android:name="android.hardware.camera"
@@ -38,6 +37,22 @@
         android:theme="@style/Theme.PurchaseRequest"
         android:requestLegacyExternalStorage="true"
         tools:targetApi="31">
+
+        <!-- 네이버 로그인 관련 설정 -->
+        <meta-data
+            android:name="com.naver.login.CLIENT_ID"
+            android:value="YOUR_CLIENT_ID" /> <!-- 네이버 개발자 센터에서 발급받은 Client ID -->
+        <meta-data
+            android:name="com.naver.login.CLIENT_SECRET"
+            android:value="YOUR_CLIENT_SECRET" /> <!-- 네이버 개발자 센터에서 발급받은 Client Secret -->
+        <meta-data
+            android:name="com.naver.login.REDIRECT_URI"
+            android:value="YOUR_REDIRECT_URI" /> <!-- 네이버 로그인 후 리다이렉트되는 URI -->
+
+        <!-- 네이버 로그인 버튼을 위한 설정 -->
+        <meta-data
+            android:name="com.naver.login.APP_NAME"
+            android:value="YourAppName" />
 
         <!-- 메인 액티비티 -->
         <activity

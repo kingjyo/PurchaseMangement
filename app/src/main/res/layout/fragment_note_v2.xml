@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <EditText
+        android:id="@+id/etNote"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="추가 전달사항이 있으면 입력하세요 (선택사항)"
+        android:textSize="18sp"
+        android:inputType="textMultiLine"
+        android:minLines="3" />
+
+    <TextView
+        android:id="@+id/tvOptional"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="💡 선택사항입니다.\n추가로 전달하실 내용이 있으면 입력해주세요.\n예: 긴급 처리 요청, 특별 요구사항 등\n\n🎤 음성으로도 입력 가능합니다"
+        android:textSize="14sp"
+        android:textColor="#777"
+        android:layout_marginTop="8dp" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabMic"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_gravity="end"
+        android:layout_marginTop="16dp"
+        android:src="@drawable/ic_mic"
+        android:contentDescription="음성 입력 버튼" />
+
+</LinearLayout>

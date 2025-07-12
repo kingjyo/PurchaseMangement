@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <EditText
+        android:id="@+id/etEquipmentName"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:minHeight="48dp"
+        android:hint="구매하실 장비나 물품명을 입력하세요"
+        android:textSize="18sp"
+        android:inputType="text" />
+
+    <TextView
+        android:id="@+id/tvHelp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="💡 구매하실 장비나 물품의 이름을 입력하거나 음성으로 말씀해주세요"
+        android:textSize="14sp"
+        android:textColor="#777"
+        android:layout_marginTop="8dp" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabMic"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_gravity="end"
+        android:layout_marginTop="16dp"
+        android:src="@drawable/ic_mic"
+        android:contentDescription="음성 입력 버튼" />
+
+</LinearLayout>

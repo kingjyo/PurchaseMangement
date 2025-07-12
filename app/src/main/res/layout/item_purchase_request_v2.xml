@@ -130,7 +130,7 @@
                 android:src="@android:drawable/ic_menu_edit"
                 android:contentDescription="수정"
                 android:visibility="gone"
-                android:tint="#FFA000" />
+                app:tint="#FFA000" />
 
         </LinearLayout>
     </LinearLayout>

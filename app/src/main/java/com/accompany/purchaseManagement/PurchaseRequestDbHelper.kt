@@ -1,5 +1,6 @@
 package com.accompany.purchaseManagement
 
+import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
@@ -115,8 +116,8 @@ class PurchaseRequestDbHelper(context: Context) : SQLiteOpenHelper(context, DATA
     }
 
     // 전체 신청 목록 조회
-    fun getAllRequests(): List<PurchaseRequest> {
-        val requests = mutableListOf<PurchaseRequest>()
+    fun getAllRequests(): List<PurchaseRequestV2> {
+        val requests = mutableListOf<PurchaseRequestV2>()
         val db = this.readableDatabase
         val cursor = db.query(
             TABLE_NAME,
@@ -217,17 +218,36 @@ class PurchaseRequestDbHelper(context: Context) : SQLiteOpenHelper(context, DATA
     }
 
     // Cursor를 PurchaseRequest 객체로 변환
-    private fun cursorToPurchaseRequest(cursor: Cursor): PurchaseRequest {
-        return PurchaseRequest(
+    @SuppressLint("Range")
+    private fun cursorToPurchaseRequest(cursor: Cursor): PurchaseRequestV2 {
+        return PurchaseRequestV2(
             id = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_ID)),
             applicantName = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_APPLICANT_NAME)),
-            applicantDepartment = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_APPLICANT_DEPARTMENT)),
+            applicantDepartment = cursor.getString(
+                cursor.getColumnIndexOrThrow(
+                    COLUMN_APPLICANT_DEPARTMENT
+                )
+            ),
             equipmentName = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EQUIPMENT_NAME)),
             location = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_LOCATION)),
             purpose = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PURPOSE)),
             note = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NOTE)),
             requestDate = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_REQUEST_DATE)),
-            status = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_STATUS))
+            status = cursor.getString(cursor.getColumnIndex(COLUMN_STATUS))
+                ?: PurchaseStatus.PENDING.displayName,
+            requestId = TODO(),
+            applicantEmail = TODO(),
+            quantity = TODO(),
+            photoUrls = TODO(),
+            modifiedDate = TODO(),
+            modifyCount = TODO(),
+            processor = TODO(),
+            processedDate = TODO(),
+            processNote = TODO()
         )
     }
+}
+
+private fun <E> MutableList<E>.add(element: PurchaseRequestV2) {
+
 }

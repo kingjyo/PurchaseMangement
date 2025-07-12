@@ -11,6 +11,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.naver.android.nlogin.OAuthLogin
+import com.naver.android.nlogin.OAuthLoginHandler
+import com.naver.android.nlogin.widget.OAuthLoginButton
 import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.launch
@@ -20,6 +23,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var dbHelper: PurchaseRequestDbHelper
     private lateinit var googleAuthHelper: GoogleAuthHelper
     private lateinit var fcmHelper: FcmNotificationHelper
+    private lateinit var mOAuthLoginModule: OAuthLogin
 
     // UI 요소들
     private lateinit var tvWelcome: TextView
@@ -28,20 +32,27 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnPurchaseHistory: Button
     private lateinit var btnCattleStatus: Button
     private lateinit var btnAdmin: Button
+    private lateinit var naverLoginButton: OAuthLoginButton  // 네이버 로그인 버튼
 
     private var currentUser: GoogleAuthHelper.UserInfo? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
 
-        // 로그인 체크
-        googleAuthHelper = GoogleAuthHelper(this)
-        if (!googleAuthHelper.isLoggedIn()) {
+        // 로그인 체크 (SharedPreferences를 이용)
+        val prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE)
+        val isLoggedIn = prefs.getBoolean("isLoggedIn", false) // 로그인 상태 확인
+
+        if (!isLoggedIn) {
+            // 로그인되지 않으면 LoginActivity로 이동
             navigateToLogin()
             return
         }
 
-        setContentView(R.layout.activity_main)
+        // 로그인된 사용자 정보 불러오기
+        val userName = prefs.getString("userName", "사용자")
+        updateWelcomeMessage(userName)  // 사용자 이름으로 환영 메시지 갱신
 
         currentUser = googleAuthHelper.getCurrentUser()
         dbHelper = PurchaseRequestDbHelper(this)
@@ -49,7 +60,23 @@ class MainActivity : AppCompatActivity() {
 
         initViews()
         setupButtons()
-        updateWelcomeMessage()
+
+        // 네이버 로그인 초기화
+        mOAuthLoginModule = OAuthLogin.getInstance()
+        mOAuthLoginModule.init(this, "YOUR_CLIENT_ID", "YOUR_CLIENT_SECRET", "YOUR_REDIRECT_URI")
+
+        // 네이버 로그인 버튼 클릭 시 네이버 로그인 시작
+        naverLoginButton = findViewById(R.id.naverLoginButton)
+        naverLoginButton.setOAuthLoginHandler(object : OAuthLoginHandler() {
+            override fun run(success: Boolean) {
+                if (success) {
+                    val accessToken = mOAuthLoginModule.accessToken
+                    getUserProfile(accessToken)  // 로그인 후 사용자 정보 가져오기
+                } else {
+                    Toast.makeText(this@MainActivity, "로그인 실패", Toast.LENGTH_SHORT).show()
+                }
+            }
+        })
 
         // FCM 토큰 업데이트
         lifecycleScope.launch {
@@ -60,6 +87,28 @@ class MainActivity : AppCompatActivity() {
 
         // 자동 데이터 정리
         autoCleanOldData()
+    }
+
+    private fun updateWelcomeMessage(userName: String?) {
+        tvWelcome = findViewById(R.id.tvWelcome)
+        tvWelcome.text = "$userName님, 환영합니다!"  // 사용자 이름을 환영 메시지로 표시
+    }
+
+    private fun getUserProfile(accessToken: String) {
+        // accessToken을 사용하여 네이버 API에서 사용자 정보 요청
+        // 예시: https://openapi.naver.com/v1/nid/me
+        Toast.makeText(this, "사용자 정보 가져오기 시작", Toast.LENGTH_SHORT).show()
+
+        // 실제 API 호출 코드를 추가할 필요 있음 (사용자 정보를 받아오는 부분)
+    }
+
+    private fun saveUserInfo(userInfo: UserInfo) {
+        val prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE)
+        val editor = prefs.edit()
+        editor.putString("userEmail", userInfo.email)
+        editor.putString("userName", userInfo.name)
+        editor.putBoolean("isLoggedIn", true)  // 로그인 상태를 저장
+        editor.apply()
     }
 
     private fun initViews() {
@@ -107,32 +156,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateWelcomeMessage() {
-        currentUser?.let { user ->
-            val welcomeText = if (user.name != "미설정" && user.department != "미설정") {
-                "${user.name}님 (${user.department})"
-            } else {
-                "환영합니다! 👆 프로필을 설정해주세요"
-            }
-            tvWelcome.text = welcomeText
-        }
-    }
-
-    private fun showProfileSetupDialog() {
-        AlertDialog.Builder(this)
-            .setTitle("프로필 설정 필요")
-            .setMessage("구매신청을 하려면 이름과 소속을 설정해야 합니다.\n관리자에게 문의해주세요.")
-            .setPositiveButton("확인", null)
-            .show()
-    }
-
-    private fun autoCleanOldData() {
-        val deletedCount = dbHelper.deleteOldRecords()
-        if (deletedCount > 0 && currentUser?.isAdmin == true) {
-            Toast.makeText(this, "${deletedCount}개의 오래된 기록이 정리되었습니다", Toast.LENGTH_SHORT).show()
-        }
-    }
-
     private fun showAdminMenu() {
         val options = arrayListOf(
             "👥 사용자 관리",
@@ -154,73 +177,31 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun openUserManagement() {
-        val intent = Intent(this, UserManagementActivity::class.java)
+    private fun navigateToLogin() {
+        val intent = Intent(this, LoginActivityV2::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
+        finish()
     }
 
-    private fun openGoogleSheets() {
-        val intent = Intent(Intent.ACTION_VIEW).apply {
-            data = android.net.Uri.parse("https://sheets.google.com")
+    private fun performLogout() {
+        // SharedPreferences에서 로그인 정보 삭제
+        val prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE)
+        val editor = prefs.edit()
+        editor.clear()  // 모든 로그인 정보 삭제
+        editor.apply()
+
+        Toast.makeText(this, "로그아웃되었습니다", Toast.LENGTH_SHORT).show()
+
+        // LoginActivityV2로 이동
+        navigateToLogin()
+    }
+
+    private fun autoCleanOldData() {
+        val deletedCount = dbHelper.deleteOldRecords()
+        if (deletedCount > 0 && currentUser?.isAdmin == true) {
+            Toast.makeText(this, "${deletedCount}개의 오래된 기록이 정리되었습니다", Toast.LENGTH_SHORT).show()
         }
-        try {
-            startActivity(intent)
-        } catch (e: Exception) {
-            Toast.makeText(this, "브라우저를 찾을 수 없습니다", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun showStatistics() {
-        lifecycleScope.launch {
-            try {
-                // TODO: Firestore에서 통계 데이터 가져오기
-                val totalCount = 100 // 예시
-                val pendingCount = 20
-                val completedCount = 80
-
-                val message = """
-                    📊 구매신청 통계
-                    
-                    총 신청: ${totalCount}건
-                    대기중: ${pendingCount}건
-                    완료: ${completedCount}건
-                    
-                    완료율: ${(completedCount * 100 / totalCount)}%
-                """.trimIndent()
-
-                AlertDialog.Builder(this@MainActivity)
-                    .setTitle("통계")
-                    .setMessage(message)
-                    .setPositiveButton("확인", null)
-                    .show()
-
-            } catch (e: Exception) {
-                Toast.makeText(this@MainActivity, "통계 로드 실패", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
-    private fun showDataDeleteConfirm() {
-        val recordCount = dbHelper.getRecordCount()
-
-        AlertDialog.Builder(this)
-            .setTitle("⚠️ 로컬 데이터 초기화")
-            .setMessage("로컬에 저장된 ${recordCount}개의 기록이 삭제됩니다.\n계속하시겠습니까?")
-            .setPositiveButton("삭제") { _, _ ->
-                val success = dbHelper.deleteAllRecords()
-                if (success) {
-                    Toast.makeText(this, "로컬 데이터가 삭제되었습니다", Toast.LENGTH_SHORT).show()
-                }
-            }
-            .setNegativeButton("취소", null)
-            .show()
-    }
-
-// MainActivity_Part1.kt에서 이어서...
-
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.menu_main, menu)
-        return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -230,7 +211,7 @@ class MainActivity : AppCompatActivity() {
                 true
             }
             R.id.action_logout -> {
-                showLogoutConfirm()
+                performLogout()  // 로그아웃 처리
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -246,7 +227,7 @@ class MainActivity : AppCompatActivity() {
                 🛡️ 권한: ${if (user.isAdmin) "관리자" else "일반 사용자"}
                 
                 ${if (user.name == "미설정" || user.department == "미설정")
-                "\n⚠️ 관리자에게 프로필 설정을 요청하세요" else ""}
+                "\n⚠️ 관리자에게 프로필 설정을 요청하세요" else ""} 
             """.trimIndent()
 
             AlertDialog.Builder(this)
@@ -262,36 +243,9 @@ class MainActivity : AppCompatActivity() {
             .setTitle("로그아웃")
             .setMessage("정말 로그아웃하시겠습니까?")
             .setPositiveButton("로그아웃") { _, _ ->
-                performLogout()
+                performLogout()  // 로그아웃 처리
             }
             .setNegativeButton("취소", null)
             .show()
     }
-
-    private fun performLogout() {
-        googleAuthHelper.signOut {
-            Toast.makeText(this, "로그아웃되었습니다", Toast.LENGTH_SHORT).show()
-            navigateToLogin()
-        }
-    }
-
-    private fun navigateToLogin() {
-        val intent = Intent(this, LoginActivityV2::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        startActivity(intent)
-        finish()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        // 다른 화면에서 돌아왔을 때 사용자 정보 갱신
-        currentUser = googleAuthHelper.getCurrentUser()
-        updateWelcomeMessage()
-    }
 }
-
-// MainActivity 전체 코드를 합치려면:
-// 1. MainActivity_Part1.kt의 내용을 복사
-// 2. "// MainActivity_Part2.kt에서 계속..." 부분을 삭제
-// 3. MainActivity_Part2.kt의 내용을 이어서 붙여넣기
-// 4. 맨 마지막 중괄호 } 확인

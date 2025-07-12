@@ -13,7 +13,6 @@ import java.io.File
 import java.io.FileWriter
 import java.text.SimpleDateFormat
 import java.util.*
-import com.accompany.purchaseManagement.PurchaseRequestAdapterV2
 
 class PurchaseHistoryActivity : AppCompatActivity() {
 
@@ -42,20 +41,41 @@ class PurchaseHistoryActivity : AppCompatActivity() {
         btnExportToExcel = findViewById(R.id.btnExportToExcel)
     }
 
-    private fun loadAllRequests() {
-        allRequests = dbHelper.getAllRequestsV2()  // V2로 데이터 클래스 일치시켜서 불러오기
+    fun loadAllRequests() {
+        val allRequests = dbHelper.getAllRequests()  // PurchaseRequest로 반환된다고 가정
+
+        // allRequests를 PurchaseRequestV2로 변환
+        val allRequestsV2 = allRequests.map { request ->
+            PurchaseRequestV2(
+                requestId = request.requestId,
+                applicantName = request.applicantName,
+                applicantDepartment = request.applicantDepartment,
+                applicantEmail = request.applicantEmail,
+                equipmentName = request.equipmentName,
+                quantity = request.quantity,
+                location = request.location,
+                purpose = request.purpose,
+                note = request.note,
+                photoUrls = request.photoUrls,
+                requestDate = request.requestDate,
+                status = request.status,
+                modifiedDate = request.modifiedDate,
+                modifyCount = request.modifyCount,
+                processor = request.processor,
+                processedDate = request.processedDate,
+                processNote = request.processNote
+            )
+        }
+
+        // PurchaseRequestV2 객체로 변환된 리스트를 adapter에 설정
         adapter = PurchaseRequestListAdapter(
             context = this,
-            requests = allRequests,
-            currentUser = null,  // 조회용이라 null 넣어도 무방
+            requests = allRequestsV2.toMutableList(),  // V2로 타입 맞춰서 전달
+            currentUser = null,
             onItemClick = null,
             onEditClick = null
         )
         lvAllRequests.adapter = adapter
-
-        // 데이터가 없으면 빈 상태 표시하기 (필요시)
-        // val llEmptyState = findViewById<View>(R.id.llEmptyState)
-        // llEmptyState.visibility = if (allRequests.isEmpty()) View.VISIBLE else View.GONE
     }
 
     private fun setupClickListeners() {

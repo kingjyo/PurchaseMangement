@@ -1,158 +1,133 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/root"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@color/background_light">
+    android:layout_height="match_parent">
 
-    <!-- 헤더 -->
-    <LinearLayout
+    <!-- 상태별 ChipGroup -->
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chipGroupStatus"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="@drawable/header_background"
-        android:padding="20dp"
-        android:elevation="4dp">
+        android:padding="12dp"
+        app:singleSelection="true"
+        app:selectionRequired="true"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp">
 
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipAll"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="전체"
+            app:checkedIconVisible="false"
+            android:checked="true"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipPending"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="대기중"
+            app:checkedIconVisible="false"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipConfirmed"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="확인됨"
+            app:checkedIconVisible="false"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipInApproval"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="결재중"
+            app:checkedIconVisible="false"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipApproved"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="승인완료"
+            app:checkedIconVisible="false"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipPreProcessed"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="처리전"
+            app:checkedIconVisible="false"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipCompleted"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="완료"
+            app:checkedIconVisible="false"/>
+    </com.google.android.material.chip.ChipGroup>
+
+    <!-- 로딩 ProgressBar -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        />
+
+    <!-- ListView (신청목록) -->
+
+    <!-- Empty 상태 안내 (초기 데이터 없음) -->
+
+    <ListView
+        android:id="@+id/lvRequests"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="130dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:divider="@color/divider"
+        android:dividerHeight="1dp"
+        android:paddingBottom="80dp"
+        android:scrollbars="vertical" />
+
+    <LinearLayout
+        android:id="@+id/llEmptyState"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone"
+        android:layout_marginTop="60dp">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="📊 구매신청 현황"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            android:textColor="@color/white"
-            android:layout_gravity="center" />
-
+            android:text="구매신청 내역이 없습니다"
+            android:textSize="18sp"
+            android:textColor="#999999"
+            android:drawableTop="@drawable/ic_assignment"
+            android:padding="16dp"/>
     </LinearLayout>
 
-    <!-- 상태 필터 탭 -->
-    <HorizontalScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/white"
-        android:elevation="2dp">
-
-        <com.google.android.material.chip.ChipGroup
-            android:id="@+id/chipGroupStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="12dp"
-            app:singleSelection="true"
-            app:checkedChip="@id/chipAll">
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipAll"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="전체"
-                style="@style/Widget.MaterialComponents.Chip.Choice" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipPending"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="⏳ 대기중"
-                style="@style/Widget.MaterialComponents.Chip.Choice" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipConfirmed"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="✅ 확인완료"
-                style="@style/Widget.MaterialComponents.Chip.Choice" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipInApproval"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="📋 결재중"
-                style="@style/Widget.MaterialComponents.Chip.Choice" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipApproved"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="✔️ 결재완료"
-                style="@style/Widget.MaterialComponents.Chip.Choice" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipPreProcessed"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="🚀 선조치"
-                style="@style/Widget.MaterialComponents.Chip.Choice" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipCompleted"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="🎉 완료"
-                style="@style/Widget.MaterialComponents.Chip.Choice" />
-
-        </com.google.android.material.chip.ChipGroup>
-
-    </HorizontalScrollView>
-
-    <!-- 목록 -->
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvRequests"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="8dp"
-            android:clipToPadding="false" />
-
-        <!-- 로딩 -->
-        <ProgressBar
-            android:id="@+id/progressBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:visibility="gone" />
-
-        <!-- 빈 상태 -->
-        <LinearLayout
-            android:id="@+id/llEmptyState"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:orientation="vertical"
-            android:visibility="gone">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="📭"
-                android:textSize="64sp"
-                android:layout_gravity="center"
-                android:layout_marginBottom="16dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="해당 상태의 구매신청이 없습니다"
-                android:textSize="18sp"
-                android:textColor="@color/text_secondary"
-                android:layout_gravity="center" />
-
-        </LinearLayout>
-
-    </FrameLayout>
-
-    <!-- FAB (관리자용 새로고침) -->
+    <!-- FloatingActionButton (새로고침) -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabRefresh"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        android:src="@drawable/ic_refresh"
-        app:tint="@color/white"
-        android:visibility="gone" />
+        android:layout_margin="24dp"
+        android:src="@android:drawable/ic_popup_sync"
+        android:contentDescription="새로고침"
+        android:visibility="gone"/>
 
-</LinearLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
