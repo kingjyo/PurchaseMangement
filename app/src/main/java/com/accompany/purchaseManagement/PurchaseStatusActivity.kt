@@ -15,6 +15,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import com.accompany.purchaseManagement.UserInfo
 
 class PurchaseStatusActivityV2 : AppCompatActivity() {
 
@@ -29,7 +30,7 @@ class PurchaseStatusActivityV2 : AppCompatActivity() {
     private lateinit var googleAuthHelper: GoogleAuthHelper
     private lateinit var fcmHelper: FcmNotificationHelper
 
-    private var currentUser: GoogleAuthHelper.UserInfo? = null
+    private var currentUser: UserInfo? = null
     private var selectedStatus: String = "전체"
     private val requestList = mutableListOf<PurchaseRequestV2>()
 

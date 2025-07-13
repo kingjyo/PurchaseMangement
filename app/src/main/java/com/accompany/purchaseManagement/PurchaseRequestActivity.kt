@@ -23,6 +23,8 @@ import kotlinx.coroutines.tasks.await
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+import com.accompany.purchaseManagement.UserInfo
+import com.google.firebase.auth.UserInfo
 
 class PurchaseRequestActivityV2 : AppCompatActivity() {
 
@@ -40,7 +42,7 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
 
     // 사용자 정보
     private lateinit var googleAuthHelper: GoogleAuthHelper
-    private var currentUser: GoogleAuthHelper.UserInfo? = null
+    private var currentUser: UserInfo? = null
 
     // 입력 데이터
     private var equipmentName = ""

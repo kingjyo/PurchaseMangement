@@ -13,6 +13,7 @@ import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
+import com.accompany.purchaseManagement.UserInfo
 
 class GoogleAuthHelper(private val activity: Activity) {
 
@@ -206,11 +207,4 @@ class GoogleAuthHelper(private val activity: Activity) {
             }
     }
 
-    // 사용자 정보 데이터 클래스
-    data class UserInfo(
-        val email: String,
-        val name: String,
-        val department: String,
-        val isAdmin: Boolean
-    )
 }

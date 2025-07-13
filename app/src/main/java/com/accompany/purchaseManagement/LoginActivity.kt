@@ -11,6 +11,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.common.SignInButton
 import kotlinx.coroutines.launch
+import com.accompany.purchaseManagement.UserInfo
+import com.accompany.purchaseManagement.NaverAuthHelper.NaverUserInfo
 
 class LoginActivityV2 : AppCompatActivity() {
 
@@ -106,7 +108,13 @@ class LoginActivityV2 : AppCompatActivity() {
                     fcmHelper.requestNotificationPermission(this@LoginActivityV2)
 
                     // 사용자 정보를 SharedPreferences에 저장
-                    saveUserInfo(userInfo)
+                    val info = UserInfo(
+                        email = email,
+                        name = userInfo.name,
+                        department = "미설정",
+                        isAdmin = false
+                    )
+                    saveUserInfo(info)
 
                     Toast.makeText(
                         this@LoginActivityV2,
@@ -126,11 +134,11 @@ class LoginActivityV2 : AppCompatActivity() {
         )
     }
 
-    private fun saveUserInfo(userInfo: UserInfo) {
+    private fun saveUserInfo(email: String, name: String) {
         val prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE)
         val editor = prefs.edit()
-        editor.putString("userEmail", userInfo.email)
-        editor.putString("userName", userInfo.name)
+        editor.putString("userEmail", email)
+        editor.putString("userName", name)
         editor.putBoolean("isLoggedIn", true)  // 로그인 상태를 저장
         editor.apply()
     }

@@ -192,6 +192,23 @@ class PurchaseRequestDbHelper(context: Context) : SQLiteOpenHelper(context, DATA
         return count
     }
 
+    // '대기중' 상태의 데이터 개수
+    fun getPendingCount(): Int {
+        val db = this.readableDatabase
+        val cursor = db.rawQuery(
+            "SELECT COUNT(*) FROM $TABLE_NAME WHERE $COLUMN_STATUS = ?",
+            arrayOf(PurchaseStatus.PENDING.displayName)
+        )
+        var count = 0
+        cursor?.use {
+            if (it.moveToFirst()) {
+                count = it.getInt(0)
+            }
+        }
+        db.close()
+        return count
+    }
+
     // 가장 오래된 데이터 날짜
     fun getOldestRecordDate(): String? {
         val db = this.readableDatabase

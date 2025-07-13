@@ -2,7 +2,6 @@ package com.accompany.purchaseManagement
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Button
@@ -11,12 +10,13 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import android.net.Uri
 import com.naver.android.nlogin.OAuthLogin
 import com.naver.android.nlogin.OAuthLoginHandler
 import com.naver.android.nlogin.widget.OAuthLoginButton
-import androidx.lifecycle.ViewModelProvider
-import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.launch
+import com.accompany.purchaseManagement.UserInfo
+import com.google.firebase.auth.UserInfo
 
 class MainActivity : AppCompatActivity() {
 
@@ -34,7 +34,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnAdmin: Button
     private lateinit var naverLoginButton: OAuthLoginButton  // 네이버 로그인 버튼
 
-    private var currentUser: GoogleAuthHelper.UserInfo? = null
+    private var currentUser: UserInfo? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,6 +54,7 @@ class MainActivity : AppCompatActivity() {
         val userName = prefs.getString("userName", "사용자")
         updateWelcomeMessage(userName)  // 사용자 이름으로 환영 메시지 갱신
 
+        googleAuthHelper = GoogleAuthHelper(this)
         currentUser = googleAuthHelper.getCurrentUser()
         dbHelper = PurchaseRequestDbHelper(this)
         fcmHelper = FcmNotificationHelper(this)
@@ -94,6 +95,14 @@ class MainActivity : AppCompatActivity() {
         tvWelcome.text = "$userName님, 환영합니다!"  // 사용자 이름을 환영 메시지로 표시
     }
 
+    private fun showProfileSetupDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("프로필 설정 필요")
+            .setMessage("구매신청을 하려면 이름과 소속을 설정해야 합니다.\n관리자에게 문의해주세요.")
+            .setPositiveButton("확인", null)
+            .show()
+    }
+
     private fun getUserProfile(accessToken: String) {
         // accessToken을 사용하여 네이버 API에서 사용자 정보 요청
         // 예시: https://openapi.naver.com/v1/nid/me
@@ -102,14 +111,6 @@ class MainActivity : AppCompatActivity() {
         // 실제 API 호출 코드를 추가할 필요 있음 (사용자 정보를 받아오는 부분)
     }
 
-    private fun saveUserInfo(userInfo: UserInfo) {
-        val prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE)
-        val editor = prefs.edit()
-        editor.putString("userEmail", userInfo.email)
-        editor.putString("userName", userInfo.name)
-        editor.putBoolean("isLoggedIn", true)  // 로그인 상태를 저장
-        editor.apply()
-    }
 
     private fun initViews() {
         tvWelcome = findViewById(R.id.tvWelcome)
@@ -174,6 +175,68 @@ class MainActivity : AppCompatActivity() {
                     3 -> showDataDeleteConfirm()
                 }
             }
+            .show()
+    }
+
+    private fun openUserManagement() {
+        val intent = Intent(this, UserManagementActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun openGoogleSheets() {
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            data = android.net.Uri.parse(AppConfig.GOOGLE_SHEETS_URL)
+        }
+        try {
+            startActivity(intent)
+        } catch (e: Exception) {
+            Toast.makeText(this, "브라우저를 찾을 수 없습니다", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun showStatistics() {
+        lifecycleScope.launch {
+            try {
+                // TODO: Firestore에서 통계 데이터 가져오기
+                val totalCount = dbHelper.getRecordCount()
+                val pendingCount = dbHelper.getPendingCount()
+                val completedCount = totalCount - pendingCount
+
+                val message = """
+                    📊 구매신청 통계
+
+                    총 신청: ${totalCount}건
+                    대기중: ${pendingCount}건
+                    완료: ${completedCount}건
+
+                    완료율: ${if (totalCount > 0) (completedCount * 100 / totalCount) else 0}%
+                """.trimIndent()
+
+                AlertDialog.Builder(this@MainActivity)
+                    .setTitle("통계")
+                    .setMessage(message)
+                    .setPositiveButton("확인", null)
+                    .show()
+
+            } catch (e: Exception) {
+                Toast.makeText(this@MainActivity, "통계 로드 실패", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun showDataDeleteConfirm() {
+        val recordCount = dbHelper.getRecordCount()
+
+        AlertDialog.Builder(this)
+            .setTitle("⚠️ 로컬 데이터 초기화")
+            .setMessage("로컬에 저장된 ${recordCount}개의 기록이 삭제됩니다.\n계속하시겠습니까?")
+            .setPositiveButton("삭제") { _, _ ->
+                val success = dbHelper.deleteAllRecords()
+                if (success) {
+                    Toast.makeText(this, "로컬 데이터가 삭제되었습니다", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("취소", null)
             .show()
     }
 
@@ -248,4 +311,53 @@ class MainActivity : AppCompatActivity() {
             .setNegativeButton("취소", null)
             .show()
     }
+}
+
+// 프로필 정보가 미설정된 경우 안내 다이얼로그
+private fun showProfileSetupDialog() {
+    AlertDialog.Builder(this)
+        .setTitle("프로필 미설정")
+        .setMessage("관리자에게 프로필 설정을 요청해주세요.")
+        .setPositiveButton("확인", null)
+        .show()
+}
+
+// 사용자 관리 화면 열기 (관리자용)
+private fun openUserManagement() {
+    startActivity(Intent(this, UserManagementActivity::class.java))
+}
+
+// 설정된 Google Sheets 주소를 웹 브라우저로 열기
+private fun openGoogleSheets() {
+    val intent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse(AppConfig.GOOGLE_SHEETS_URL))
+    startActivity(intent)
+}
+
+// 로컬 DB 통계 표시
+private fun showStatistics() {
+    val count = dbHelper.getRecordCount()
+    val oldest = dbHelper.getOldestRecordDate() ?: "데이터 없음"
+    val message = "총 ${count}건\n가장 오래된 기록: $oldest"
+    AlertDialog.Builder(this)
+        .setTitle("데이터 통계")
+        .setMessage(message)
+        .setPositiveButton("확인", null)
+        .show()
+}
+
+// 모든 로컬 데이터를 삭제하기 전에 확인
+private fun showDataDeleteConfirm() {
+    AlertDialog.Builder(this)
+        .setTitle("데이터 초기화")
+        .setMessage("모든 로컬 데이터를 삭제할까요?")
+        .setPositiveButton("삭제") { _, _ ->
+            if (dbHelper.deleteAllRecords()) {
+                Toast.makeText(this, "데이터가 삭제되었습니다", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "삭제할 데이터가 없습니다", Toast.LENGTH_SHORT).show()
+            }
+        }
+        .setNegativeButton("취소", null)
+        .show()
+}
 }
