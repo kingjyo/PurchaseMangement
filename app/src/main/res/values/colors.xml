@@ -14,6 +14,9 @@
 <color name="teal_700">#FF018786</color>
 <color name="black">#FF000000</color>
 <color name="white">#FFFFFFFF</color>
+    <color name="naver_button_normal">#03C75A</color>   <!-- 네이버 대표 연녹색 -->
+    <color name="naver_button_pressed">#01B754</color> <!-- 눌림용 진녹색 -->
+
 
 <!-- 앱 테마 색상 -->
 <color name="primary_color">#4CAF50</color>

@@ -11,8 +11,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.common.SignInButton
 import kotlinx.coroutines.launch
-import com.accompany.purchaseManagement.UserInfo
-import com.accompany.purchaseManagement.NaverAuthHelper.NaverUserInfo
 
 class LoginActivityV2 : AppCompatActivity() {
 
@@ -160,6 +158,15 @@ class LoginActivityV2 : AppCompatActivity() {
                         }
 
                         fcmHelper.requestNotificationPermission(this@LoginActivityV2)
+
+                        // **[여기 추가!]**
+                        val info = UserInfo(
+                            email = account.email ?: "",
+                            name = account.displayName ?: "미설정",
+                            department = "미설정",
+                            isAdmin = false
+                        )
+                        saveUserInfo(info)
 
                         Toast.makeText(
                             this@LoginActivityV2,

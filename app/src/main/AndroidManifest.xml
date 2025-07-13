@@ -21,6 +21,10 @@
     <!-- Android 13+ 미디어 권한 -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+
+
 
     <!-- 카메라 하드웨어 (선택사항) -->
     <uses-feature
@@ -41,18 +45,18 @@
         <!-- 네이버 로그인 관련 설정 -->
         <meta-data
             android:name="com.naver.login.CLIENT_ID"
-            android:value="YOUR_CLIENT_ID" /> <!-- 네이버 개발자 센터에서 발급받은 Client ID -->
+            android:value="eKRvsHfNRW7o1D41_IEU" /> <!-- 네이버 개발자 센터에서 발급받은 Client ID -->
         <meta-data
             android:name="com.naver.login.CLIENT_SECRET"
-            android:value="YOUR_CLIENT_SECRET" /> <!-- 네이버 개발자 센터에서 발급받은 Client Secret -->
+            android:value="r811KipLsH" /> <!-- 네이버 개발자 센터에서 발급받은 Client Secret -->
         <meta-data
             android:name="com.naver.login.REDIRECT_URI"
-            android:value="YOUR_REDIRECT_URI" /> <!-- 네이버 로그인 후 리다이렉트되는 URI -->
+            android:value="naverlogin://com.accompany.purchaseManagement" /> <!-- 네이버 로그인 후 리다이렉트되는 URI -->
 
         <!-- 네이버 로그인 버튼을 위한 설정 -->
         <meta-data
-            android:name="com.naver.login.APP_NAME"
-            android:value="YourAppName" />
+            android:name="com.naver.login.구매신청"
+            android:value="구매신청" />
 
         <!-- 메인 액티비티 -->
         <activity
@@ -68,23 +72,19 @@
         </activity>
 
         <activity
-            android:name=".auth.LoginActivity"
+            android:name=".LoginActivityV2"
             android:exported="true"
-            android:windowSoftInputMode="adjustResize">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name=".auth.RegisterActivity"
+            android:name=".ProfileSetupActivity"
             android:exported="false"
+            android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" />
 
         <!-- 구매신청 액티비티 -->
         <activity
-            android:name=".PurchaseRequestActivity"
+            android:name=".PurchaseRequestActivityV2"
             android:exported="false"
             android:screenOrientation="portrait"
             android:label="구매신청"
@@ -97,7 +97,7 @@
 
         <!-- 구매신청 현황 액티비티 -->
         <activity
-            android:name=".PurchaseStatusActivity"
+            android:name=".PurchaseStatusActivityV2"
             android:exported="false"
             android:screenOrientation="portrait"
             android:label="구매신청 현황"

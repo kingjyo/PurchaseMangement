@@ -15,7 +15,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import com.accompany.purchaseManagement.UserInfo
 
 class PurchaseStatusActivityV2 : AppCompatActivity() {
 
@@ -36,7 +35,7 @@ class PurchaseStatusActivityV2 : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_purchase_status_improved)
+        setContentView(R.layout.activity_purchase_status)
 
         supportActionBar?.title = "구매신청 현황"
 

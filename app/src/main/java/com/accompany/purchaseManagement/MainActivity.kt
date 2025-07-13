@@ -10,9 +10,12 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import android.net.Uri
 import kotlinx.coroutines.launch
-import com.accompany.purchaseManagement.UserInfo
+
+// 네이버 로그인 라이브러리가 없다면 이 부분 전체 주석처리/삭제 가능
+// import com.naver.android.nlogin.OAuthLogin
+// import com.naver.android.nlogin.OAuthLoginHandler
+// import com.naver.android.nlogin.widget.OAuthLoginButton
 
 class MainActivity : AppCompatActivity() {
 
@@ -27,8 +30,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnPurchaseHistory: Button
     private lateinit var btnCattleStatus: Button
     private lateinit var btnAdmin: Button
+    // private lateinit var naverLoginButton: OAuthLoginButton  // 네이버 로그인 버튼 (주석)
 
-    private var currentUser: UserInfo? = null
+    private var currentUser: UserInfo? = null // 반드시 존재해야 함!
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,7 +55,19 @@ class MainActivity : AppCompatActivity() {
 
         initViews()
         setupButtons()
+        updateWelcomeMessage(currentUser?.name)
 
+        // (선택) 네이버 로그인 버튼은 실제 구현 시 여기에 추가
+        /*
+        mOAuthLoginModule = OAuthLogin.getInstance()
+        mOAuthLoginModule.init(this, "YOUR_CLIENT_ID", "YOUR_CLIENT_SECRET", "YOUR_REDIRECT_URI")
+        naverLoginButton = findViewById(R.id.naverLoginButton)
+        naverLoginButton.setOAuthLoginHandler(object : OAuthLoginHandler() {
+            override fun run(success: Boolean) {
+                // 네이버 로그인 로직
+            }
+        })
+        */
 
         // FCM 토큰 업데이트
         lifecycleScope.launch {
@@ -64,6 +80,34 @@ class MainActivity : AppCompatActivity() {
         autoCleanOldData()
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        // 항상 최신 currentUser 정보로 재초기화
+        googleAuthHelper = GoogleAuthHelper(this)
+        currentUser = googleAuthHelper.getCurrentUser()
+
+        if (currentUser == null) {
+            navigateToLogin()
+            return
+        }
+
+        // 프로필 미설정 시 프로필 입력 화면으로 이동
+        if (currentUser?.name == "미설정" || currentUser?.department == "미설정") {
+            startActivity(Intent(this, ProfileSetupActivity::class.java))
+            finish()
+            return
+        }
+
+        // UI 최신화 (환영 메시지 등)
+        updateWelcomeMessage(currentUser?.name)
+        // 필요하면 뷰 초기화나 버튼 세팅도 여기에!
+    }
+
+    private fun updateWelcomeMessage(userName: String?) {
+        tvWelcome = findViewById(R.id.tvWelcome)
+        tvWelcome.text = "${userName ?: "사용자"}님, 환영합니다!"  // 사용자 이름을 환영 메시지로 표시
+    }
 
     private fun showProfileSetupDialog() {
         AlertDialog.Builder(this)
@@ -73,7 +117,6 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
-
     private fun initViews() {
         tvWelcome = findViewById(R.id.tvWelcome)
         btnPurchaseRequest = findViewById(R.id.btnPurchaseRequest)
@@ -81,6 +124,7 @@ class MainActivity : AppCompatActivity() {
         btnPurchaseHistory = findViewById(R.id.btnPurchaseHistory)
         btnCattleStatus = findViewById(R.id.btnCattleStatus)
         btnAdmin = findViewById(R.id.btnAdmin)
+        // naverLoginButton = findViewById(R.id.naverLoginButton) // 네이버 로그인 버튼 (옵션)
     }
 
     private fun setupButtons() {
@@ -89,24 +133,21 @@ class MainActivity : AppCompatActivity() {
             if (currentUser?.name == "미설정" || currentUser?.department == "미설정") {
                 showProfileSetupDialog()
             } else {
-                val intent = Intent(this, PurchaseStatusActivityV2::class.java)
+                val intent = Intent(this, PurchaseRequestActivityV2::class.java)
                 startActivity(intent)
             }
         }
 
-        // 구매신청 현황 버튼
         btnPurchaseStatus.setOnClickListener {
             val intent = Intent(this, PurchaseStatusActivityV2::class.java)
             startActivity(intent)
         }
 
-        // 구매신청 기록 버튼
         btnPurchaseHistory.setOnClickListener {
             val intent = Intent(this, PurchaseHistoryActivity::class.java)
             startActivity(intent)
         }
 
-        // 축우현황 버튼
         btnCattleStatus.setOnClickListener {
             val intent = Intent(this, CattleStatusActivity::class.java)
             startActivity(intent)
@@ -146,20 +187,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun openGoogleSheets() {
-        val intent = Intent(Intent.ACTION_VIEW).apply {
-            data = android.net.Uri.parse(AppConfig.GOOGLE_SHEETS_URL)
-        }
-        try {
+        // AppConfig.GOOGLE_SHEETS_URL이 정의되어 있다고 가정
+        val url = try { AppConfig.GOOGLE_SHEETS_URL } catch (e: Exception) { "" }
+        if (url.isNotBlank()) {
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.data = android.net.Uri.parse(url)
             startActivity(intent)
-        } catch (e: Exception) {
-            Toast.makeText(this, "브라우저를 찾을 수 없습니다", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, "구글 시트 URL을 찾을 수 없습니다", Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun showStatistics() {
         lifecycleScope.launch {
             try {
-                // TODO: Firestore에서 통계 데이터 가져오기
                 val totalCount = dbHelper.getRecordCount()
                 val pendingCount = dbHelper.getPendingCount()
                 val completedCount = totalCount - pendingCount
@@ -179,7 +220,6 @@ class MainActivity : AppCompatActivity() {
                     .setMessage(message)
                     .setPositiveButton("확인", null)
                     .show()
-
             } catch (e: Exception) {
                 Toast.makeText(this@MainActivity, "통계 로드 실패", Toast.LENGTH_SHORT).show()
             }
@@ -210,15 +250,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun performLogout() {
-        // SharedPreferences에서 로그인 정보 삭제
         val prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE)
         val editor = prefs.edit()
-        editor.clear()  // 모든 로그인 정보 삭제
+        editor.clear()
         editor.apply()
 
         Toast.makeText(this, "로그아웃되었습니다", Toast.LENGTH_SHORT).show()
-
-        // LoginActivityV2로 이동
         navigateToLogin()
     }
 
@@ -236,7 +273,7 @@ class MainActivity : AppCompatActivity() {
                 true
             }
             R.id.action_logout -> {
-                performLogout()  // 로그아웃 처리
+                performLogout()
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -268,7 +305,7 @@ class MainActivity : AppCompatActivity() {
             .setTitle("로그아웃")
             .setMessage("정말 로그아웃하시겠습니까?")
             .setPositiveButton("로그아웃") { _, _ ->
-                performLogout()  // 로그아웃 처리
+                performLogout()
             }
             .setNegativeButton("취소", null)
             .show()

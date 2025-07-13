@@ -1,6 +1,7 @@
 package com.accompany.purchaseManagement
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.text.Editable
@@ -15,6 +16,13 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import android.util.Log
+import android.speech.RecognizerIntent
+import android.app.Activity
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+
+
 
 // 1. 음성 입력이 가능한 기본 Fragment
 abstract class VoiceEnabledFragment : Fragment() {
@@ -22,6 +30,19 @@ abstract class VoiceEnabledFragment : Fragment() {
     protected lateinit var speechHelper: SpeechRecognitionHelper
     protected var micButton: FloatingActionButton? = null
     protected var isVoiceMode = false
+
+    // 음성 인식 결과를 처리할 launcher를 추가합니다.
+    private val speechResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val data = result.data
+                speechHelper.handleActivityResult(
+                    result.resultCode,
+                    result.resultCode,
+                    data
+                )
+            }
+        }
 
     companion object {
         private const val REQUEST_RECORD_AUDIO_PERMISSION = 200
@@ -34,7 +55,7 @@ abstract class VoiceEnabledFragment : Fragment() {
         }
     }
 
-    protected fun setupVoiceInput(editText: EditText, micButton: FloatingActionButton) {
+    open fun setupVoiceInput(editText: EditText, micButton: FloatingActionButton) {
         this.micButton = micButton
 
         // 음성 인식 콜백 설정
@@ -45,18 +66,23 @@ abstract class VoiceEnabledFragment : Fragment() {
                     val newText = if (currentText.isEmpty()) text else "$currentText $text"
                     editText.setText(newText)
                     editText.setSelection(editText.text.length)
+
+                    // 음성인식 종료 상태로 버튼 복구
+                    isVoiceMode = false
+                    updateMicButtonState(false)
                 }
             }
 
             override fun onError(error: String) {
                 activity?.runOnUiThread {
+                    isVoiceMode = false
                     updateMicButtonState(false)
                 }
             }
 
             override fun onReadyForSpeech() {
                 activity?.runOnUiThread {
-                    micButton.setImageResource(R.drawable.ic_mic_active)
+                    updateMicButtonState(true)
                 }
             }
 
@@ -65,34 +91,38 @@ abstract class VoiceEnabledFragment : Fragment() {
                     micButton.setImageResource(R.drawable.ic_mic)
                 }
             }
-
-            override fun onPartialResults(partialText: String) {
-                // 실시간 표시 (선택사항)
-            }
         })
 
         // 마이크 버튼 클릭 리스너
         micButton.setOnClickListener {
-            if (checkAudioPermission()) {
-                toggleVoiceInput()
+            if (isVoiceMode) {
+                isVoiceMode = false
+                updateMicButtonState(false)
+                speechHelper.stopListening()  // 명시적으로 중지
             } else {
-                requestAudioPermission()
+                if (checkAudioPermission()) {
+                    isVoiceMode = true
+                    updateMicButtonState(true)
+                    speechHelper.startSingleRecognition()  // 단일 음성 인식 시작
+                } else {
+                    requestAudioPermission()
+                }
             }
         }
     }
 
-    private fun toggleVoiceInput() {
-        isVoiceMode = !isVoiceMode
-        if (isVoiceMode) {
-            speechHelper.toggleContinuousRecognition()
-            updateMicButtonState(true)
-        } else {
-            speechHelper.stopListening()
-            updateMicButtonState(false)
+    protected fun startSpeechRecognition() {
+        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, "ko-KR")
+            putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, requireActivity().packageName)
+            putExtra(RecognizerIntent.EXTRA_PROMPT, "말씀해주세요")
+            putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
         }
+        speechResultLauncher.launch(intent)
     }
 
-    private fun updateMicButtonState(isActive: Boolean) {
+    protected fun updateMicButtonState(isActive: Boolean) {
         micButton?.apply {
             if (isActive) {
                 setImageResource(R.drawable.ic_mic_active)
@@ -104,14 +134,14 @@ abstract class VoiceEnabledFragment : Fragment() {
         }
     }
 
-    private fun checkAudioPermission(): Boolean {
+    protected fun checkAudioPermission(): Boolean {
         return ContextCompat.checkSelfPermission(
             requireContext(),
             Manifest.permission.RECORD_AUDIO
         ) == PackageManager.PERMISSION_GRANTED
     }
 
-    private fun requestAudioPermission() {
+    protected fun requestAudioPermission() {
         ActivityCompat.requestPermissions(
             requireActivity(),
             arrayOf(Manifest.permission.RECORD_AUDIO),
@@ -142,7 +172,7 @@ class EquipmentNameFragmentV2 : VoiceEnabledFragment() {
         tvHelp = view.findViewById(R.id.tvHelp)
         val fabMic = view.findViewById<FloatingActionButton>(R.id.fabMic)
 
-        // 음성 입력 설정
+        // 음성 입력 설정 (단일 음성 인식으로 변경)
         setupVoiceInput(etEquipmentName, fabMic)
 
         // 포커스 자동 설정
@@ -170,7 +200,62 @@ class EquipmentNameFragmentV2 : VoiceEnabledFragment() {
         return view
     }
 
-    fun getEquipmentName(): String = etEquipmentName.text.toString().trim()
+    // 기존의 음성 입력 메서드를 단일 음성 인식으로 수정
+    override fun setupVoiceInput(editText: EditText, micButton: FloatingActionButton) {
+        this.micButton = micButton
+
+        // 음성 인식 콜백 설정
+        speechHelper.setCallback(object : SpeechRecognitionHelper.SpeechRecognitionCallback {
+            override fun onResults(text: String) {
+                activity?.runOnUiThread {
+                    // 음성 인식 결과를 EditText에 추가
+                    val currentText = editText.text.toString()
+                    val newText = if (currentText.isEmpty()) text else "$currentText $text"
+                    editText.setText(newText)
+                    editText.setSelection(editText.text.length)
+                    // 음성인식 종료 상태로 버튼 복구
+                    isVoiceMode = false
+                    updateMicButtonState(false)
+                }
+            }
+
+            override fun onError(error: String) {
+                activity?.runOnUiThread {
+                    isVoiceMode = false
+                    updateMicButtonState(false)
+                }
+            }
+
+            override fun onReadyForSpeech() {
+                activity?.runOnUiThread {
+                    updateMicButtonState(true)
+                }
+            }
+
+            override fun onEndOfSpeech() {
+                activity?.runOnUiThread {
+                    micButton.setImageResource(R.drawable.ic_mic)
+                }
+            }
+        })
+
+        // 마이크 버튼 클릭 리스너
+        micButton.setOnClickListener {
+            if (isVoiceMode) {
+                isVoiceMode = false
+                updateMicButtonState(false)
+                speechHelper.stopListening()  // 명시적으로 중지
+            } else {
+                if (checkAudioPermission()) {
+                    isVoiceMode = true
+                    updateMicButtonState(true)
+                    speechHelper.startSingleRecognition()  // 단일 음성 인식 시작
+                } else {
+                    requestAudioPermission()
+                }
+            }
+        }
+    }
 }
 
 // 3. 용도 입력 Fragment (음성 지원)
@@ -190,7 +275,7 @@ class PurposeFragmentV2 : VoiceEnabledFragment() {
         tvExamples = view.findViewById(R.id.tvExamples)
         val fabMic = view.findViewById<FloatingActionButton>(R.id.fabMic)
 
-        // 음성 입력 설정
+        // 단일 음성 입력 설정
         setupVoiceInput(etPurpose, fabMic)
 
         // 예시 표시
@@ -200,11 +285,67 @@ class PurposeFragmentV2 : VoiceEnabledFragment() {
             • 트랙터 수리
             • 축사 환경 개선
             • 장비 교체
-            
-            🎤 마이크 버튼을 눌러 음성으로 입력할 수 있습니다
         """.trimIndent()
 
         return view
+    }
+
+    // 수정된 부분: 단일 음성 인식에 맞게 처리
+    override fun setupVoiceInput(editText: EditText, micButton: FloatingActionButton) {
+        this.micButton = micButton
+
+        // 음성 인식 콜백 설정
+        speechHelper.setCallback(object : SpeechRecognitionHelper.SpeechRecognitionCallback {
+            override fun onResults(text: String) {
+                activity?.runOnUiThread {
+                    // 음성 인식 결과를 EditText에 추가
+                    val currentText = editText.text.toString()
+                    val newText = if (currentText.isEmpty()) text else "$currentText $text"
+                    editText.setText(newText)
+                    editText.setSelection(editText.text.length)
+
+                    // 음성인식 종료 상태로 버튼 복구
+                    isVoiceMode = false
+                    updateMicButtonState(false)
+                }
+            }
+
+            override fun onError(error: String) {
+                activity?.runOnUiThread {
+                    isVoiceMode = false
+                    updateMicButtonState(false)
+                }
+            }
+
+            override fun onReadyForSpeech() {
+                activity?.runOnUiThread {
+                    updateMicButtonState(true)
+                }
+            }
+
+            override fun onEndOfSpeech() {
+                activity?.runOnUiThread {
+                    micButton.setImageResource(R.drawable.ic_mic)
+                }
+            }
+        })
+
+        // 마이크 버튼 클릭 리스너
+        micButton.setOnClickListener {
+            if (isVoiceMode) {
+                isVoiceMode = false
+                updateMicButtonState(false)
+                speechHelper.stopListening()  // 명시적으로 중지
+            } else {
+                if (checkAudioPermission()) {
+                    isVoiceMode = true
+                    updateMicButtonState(true)
+                    speechHelper.startSingleRecognition()  // 단일 음성 인식 시작
+                } else {
+                    requestAudioPermission()
+                }
+            }
+        }
     }
 
     fun getPurpose(): String = etPurpose.text.toString().trim()
@@ -227,7 +368,7 @@ class NoteFragmentV2 : VoiceEnabledFragment() {
         tvOptional = view.findViewById(R.id.tvOptional)
         val fabMic = view.findViewById<FloatingActionButton>(R.id.fabMic)
 
-        // 음성 입력 설정
+        // 단일 음성 입력 설정
         setupVoiceInput(etNote, fabMic)
 
         tvOptional.text = """
@@ -235,12 +376,69 @@ class NoteFragmentV2 : VoiceEnabledFragment() {
             
             추가로 전달하실 내용이 있으면 입력해주세요.
             예: 긴급 처리 요청, 특별 요구사항 등
-            
-            🎤 음성으로도 입력 가능합니다
         """.trimIndent()
 
         return view
     }
+
+    // 단일 음성 인식에 맞게 수정된 부분
+    override fun setupVoiceInput(editText: EditText, micButton: FloatingActionButton) {
+        this.micButton = micButton
+
+        // 음성 인식 콜백 설정
+        speechHelper.setCallback(object : SpeechRecognitionHelper.SpeechRecognitionCallback {
+            override fun onResults(text: String) {
+                activity?.runOnUiThread {
+                    // 음성 인식 결과를 EditText에 추가
+                    val currentText = editText.text.toString()
+                    val newText = if (currentText.isEmpty()) text else "$currentText $text"
+                    editText.setText(newText)
+                    editText.setSelection(editText.text.length)
+
+                    // 음성인식 종료 상태로 버튼 복구
+                    isVoiceMode = false
+                    updateMicButtonState(false)
+                }
+            }
+
+            override fun onError(error: String) {
+                activity?.runOnUiThread {
+                    isVoiceMode = false
+                    updateMicButtonState(false)
+                }
+            }
+
+            override fun onReadyForSpeech() {
+                activity?.runOnUiThread {
+                    updateMicButtonState(true)
+                }
+            }
+
+            override fun onEndOfSpeech() {
+                activity?.runOnUiThread {
+                    micButton.setImageResource(R.drawable.ic_mic)
+                }
+            }
+        })
+
+        // 마이크 버튼 클릭 리스너
+        micButton.setOnClickListener {
+            if (isVoiceMode) {
+                isVoiceMode = false
+                updateMicButtonState(false)
+                speechHelper.stopListening()  // 명시적으로 중지
+            } else {
+                if (checkAudioPermission()) {
+                    isVoiceMode = true
+                    updateMicButtonState(true)
+                    speechHelper.startSingleRecognition()  // 단일 음성 인식 시작
+                } else {
+                    requestAudioPermission()
+                }
+            }
+        }
+    }
+
 
     fun getNote(): String = etNote.text.toString().trim()
 }

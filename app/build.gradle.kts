@@ -6,12 +6,12 @@ plugins {
 
 android {
     namespace = "com.accompany.purchaseManagement"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.accompany.purchaseManagement"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -43,7 +43,7 @@ android {
     // Android 13+ 권한 관련 설정
     packaging {
         resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "META-INF/DEPENDENCIES"
         }
     }
 }
@@ -58,6 +58,7 @@ dependencies {
     // Activity & Fragment KTX
     implementation("androidx.activity:activity-ktx:1.8.2")
     implementation("androidx.fragment:fragment-ktx:1.6.2")
+    implementation("androidx.activity:activity-ktx:1.10.1")
 
     // RecyclerView
     implementation("androidx.recyclerview:recyclerview:1.3.2")

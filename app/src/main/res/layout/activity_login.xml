@@ -50,16 +50,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:gravity="center">
+            android:gravity="center"
+            android:layout_marginTop="8dp">
 
             <!-- Google 로그인 버튼 -->
             <com.google.android.gms.common.SignInButton
                 android:id="@+id/btnGoogleSignIn"
                 android:layout_width="280dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                app:buttonSize="wide"
-                app:colorScheme="light"
+                android:layout_height="56dp"
+                android:textSize="16sp"
+                android:textStyle="bold"
                 android:layout_marginBottom="12dp" />
 
             <!-- 네이버 로그인 버튼 -->
@@ -75,8 +75,8 @@
                 android:drawableStart="@drawable/ic_naver_logo"
                 android:drawablePadding="8dp"
                 android:paddingHorizontal="20dp"
-                android:gravity="center" />
-
+                android:gravity="center"
+                android:layout_marginBottom="4dp" />
         </LinearLayout>
 
         <!-- 또는 구분선 -->

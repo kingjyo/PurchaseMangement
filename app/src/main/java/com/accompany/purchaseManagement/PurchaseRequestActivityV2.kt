@@ -11,8 +11,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
@@ -23,7 +21,6 @@ import kotlinx.coroutines.tasks.await
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
-import com.accompany.purchaseManagement.UserInfo
 
 class PurchaseRequestActivityV2 : AppCompatActivity() {
 
@@ -106,7 +103,7 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
         // 탭 설정
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
             tab.text = when (position) {
-                0 -> "장비명"
+                0 -> "장비명/품목"
                 1 -> "수량"
                 2 -> "장소"
                 3 -> "용도"
@@ -143,7 +140,7 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
                         as? EquipmentNameFragment
                 equipmentName = fragment?.getEquipmentName() ?: ""
                 if (equipmentName.isEmpty()) {
-                    Toast.makeText(this, "장비명을 입력해주세요", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "장비명/품목을 입력해주세요", Toast.LENGTH_SHORT).show()
                     false
                 } else true
             }
