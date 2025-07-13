@@ -16,7 +16,6 @@ import com.naver.android.nlogin.OAuthLoginHandler
 import com.naver.android.nlogin.widget.OAuthLoginButton
 import kotlinx.coroutines.launch
 import com.accompany.purchaseManagement.UserInfo
-import com.google.firebase.auth.UserInfo
 
 class MainActivity : AppCompatActivity() {
 
@@ -311,53 +310,4 @@ class MainActivity : AppCompatActivity() {
             .setNegativeButton("취소", null)
             .show()
     }
-}
-
-// 프로필 정보가 미설정된 경우 안내 다이얼로그
-private fun showProfileSetupDialog() {
-    AlertDialog.Builder(this)
-        .setTitle("프로필 미설정")
-        .setMessage("관리자에게 프로필 설정을 요청해주세요.")
-        .setPositiveButton("확인", null)
-        .show()
-}
-
-// 사용자 관리 화면 열기 (관리자용)
-private fun openUserManagement() {
-    startActivity(Intent(this, UserManagementActivity::class.java))
-}
-
-// 설정된 Google Sheets 주소를 웹 브라우저로 열기
-private fun openGoogleSheets() {
-    val intent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse(AppConfig.GOOGLE_SHEETS_URL))
-    startActivity(intent)
-}
-
-// 로컬 DB 통계 표시
-private fun showStatistics() {
-    val count = dbHelper.getRecordCount()
-    val oldest = dbHelper.getOldestRecordDate() ?: "데이터 없음"
-    val message = "총 ${count}건\n가장 오래된 기록: $oldest"
-    AlertDialog.Builder(this)
-        .setTitle("데이터 통계")
-        .setMessage(message)
-        .setPositiveButton("확인", null)
-        .show()
-}
-
-// 모든 로컬 데이터를 삭제하기 전에 확인
-private fun showDataDeleteConfirm() {
-    AlertDialog.Builder(this)
-        .setTitle("데이터 초기화")
-        .setMessage("모든 로컬 데이터를 삭제할까요?")
-        .setPositiveButton("삭제") { _, _ ->
-            if (dbHelper.deleteAllRecords()) {
-                Toast.makeText(this, "데이터가 삭제되었습니다", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, "삭제할 데이터가 없습니다", Toast.LENGTH_SHORT).show()
-            }
-        }
-        .setNegativeButton("취소", null)
-        .show()
-}
 }

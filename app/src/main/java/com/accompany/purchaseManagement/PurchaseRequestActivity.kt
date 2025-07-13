@@ -24,7 +24,6 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import com.accompany.purchaseManagement.UserInfo
-import com.google.firebase.auth.UserInfo
 
 class PurchaseRequestActivityV2 : AppCompatActivity() {
 

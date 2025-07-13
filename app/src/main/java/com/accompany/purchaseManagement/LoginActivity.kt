@@ -134,13 +134,16 @@ class LoginActivityV2 : AppCompatActivity() {
         )
     }
 
-    private fun saveUserInfo(email: String, name: String) {
+    private fun saveUserInfo(info: UserInfo) {
         val prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE)
-        val editor = prefs.edit()
-        editor.putString("userEmail", email)
-        editor.putString("userName", name)
-        editor.putBoolean("isLoggedIn", true)  // 로그인 상태를 저장
-        editor.apply()
+        prefs.edit().apply {
+            putString("userEmail", info.email)
+            putString("userName", info.name)
+            putString("userDepartment", info.department)
+            putBoolean("isAdmin", info.isAdmin)
+            putBoolean("isLoggedIn", true)
+            apply()
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
