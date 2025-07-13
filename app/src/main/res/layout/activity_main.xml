@@ -71,14 +71,15 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="4dp">
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="@color/primary_color">
 
                 <Button
                     android:id="@+id/btnPurchaseStatus"
                     android:layout_width="match_parent"
                     android:layout_height="80dp"
                     android:text="📊 구매신청 현황"
-                    android:textSize="22sp"
+                    android:textSize="26sp"
                     android:textStyle="bold"
                     android:background="?attr/selectableItemBackground" />
 
@@ -90,14 +91,15 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="4dp">
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="@color/primary_color">
 
                 <Button
                     android:id="@+id/btnPurchaseHistory"
                     android:layout_width="match_parent"
                     android:layout_height="80dp"
                     android:text="📈 구매신청 기록"
-                    android:textSize="22sp"
+                    android:textSize="26sp"
                     android:textStyle="bold"
                     android:background="?attr/selectableItemBackground" />
 
@@ -118,30 +120,12 @@
                     android:layout_width="match_parent"
                     android:layout_height="70dp"
                     android:text="🐄 축우현황 조회"
-                    android:textSize="20sp"
+                    android:textSize="26sp"
                     android:textStyle="bold"
                     android:textColor="@color/white"
                     android:background="?attr/selectableItemBackground" />
 
             </com.google.android.material.card.MaterialCardView>
-
-            <?xml version="1.0" encoding="utf-8"?>
-            <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:padding="16dp">
-
-                <!-- 네이버 로그인 버튼 -->
-                <com.naver.android.nlogin.widget.OAuthLoginButton
-                    android:id="@+id/naverLoginButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="네이버 로그인"
-                    android:layout_gravity="center" />
-            </LinearLayout>
-
 
             <!-- 관리자 버튼 (관리자만 보임) -->
             <com.google.android.material.card.MaterialCardView
