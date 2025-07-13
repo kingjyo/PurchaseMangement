@@ -11,9 +11,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import android.net.Uri
-import com.naver.android.nlogin.OAuthLogin
-import com.naver.android.nlogin.OAuthLoginHandler
-import com.naver.android.nlogin.widget.OAuthLoginButton
 import kotlinx.coroutines.launch
 import com.accompany.purchaseManagement.UserInfo
 
@@ -22,7 +19,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var dbHelper: PurchaseRequestDbHelper
     private lateinit var googleAuthHelper: GoogleAuthHelper
     private lateinit var fcmHelper: FcmNotificationHelper
-    private lateinit var mOAuthLoginModule: OAuthLogin
 
     // UI 요소들
     private lateinit var tvWelcome: TextView
@@ -31,7 +27,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnPurchaseHistory: Button
     private lateinit var btnCattleStatus: Button
     private lateinit var btnAdmin: Button
-    private lateinit var naverLoginButton: OAuthLoginButton  // 네이버 로그인 버튼
 
     private var currentUser: UserInfo? = null
 
@@ -49,10 +44,6 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        // 로그인된 사용자 정보 불러오기
-        val userName = prefs.getString("userName", "사용자")
-        updateWelcomeMessage(userName)  // 사용자 이름으로 환영 메시지 갱신
-
         googleAuthHelper = GoogleAuthHelper(this)
         currentUser = googleAuthHelper.getCurrentUser()
         dbHelper = PurchaseRequestDbHelper(this)
@@ -61,22 +52,6 @@ class MainActivity : AppCompatActivity() {
         initViews()
         setupButtons()
 
-        // 네이버 로그인 초기화
-        mOAuthLoginModule = OAuthLogin.getInstance()
-        mOAuthLoginModule.init(this, "YOUR_CLIENT_ID", "YOUR_CLIENT_SECRET", "YOUR_REDIRECT_URI")
-
-        // 네이버 로그인 버튼 클릭 시 네이버 로그인 시작
-        naverLoginButton = findViewById(R.id.naverLoginButton)
-        naverLoginButton.setOAuthLoginHandler(object : OAuthLoginHandler() {
-            override fun run(success: Boolean) {
-                if (success) {
-                    val accessToken = mOAuthLoginModule.accessToken
-                    getUserProfile(accessToken)  // 로그인 후 사용자 정보 가져오기
-                } else {
-                    Toast.makeText(this@MainActivity, "로그인 실패", Toast.LENGTH_SHORT).show()
-                }
-            }
-        })
 
         // FCM 토큰 업데이트
         lifecycleScope.launch {
@@ -89,10 +64,6 @@ class MainActivity : AppCompatActivity() {
         autoCleanOldData()
     }
 
-    private fun updateWelcomeMessage(userName: String?) {
-        tvWelcome = findViewById(R.id.tvWelcome)
-        tvWelcome.text = "$userName님, 환영합니다!"  // 사용자 이름을 환영 메시지로 표시
-    }
 
     private fun showProfileSetupDialog() {
         AlertDialog.Builder(this)
@@ -100,14 +71,6 @@ class MainActivity : AppCompatActivity() {
             .setMessage("구매신청을 하려면 이름과 소속을 설정해야 합니다.\n관리자에게 문의해주세요.")
             .setPositiveButton("확인", null)
             .show()
-    }
-
-    private fun getUserProfile(accessToken: String) {
-        // accessToken을 사용하여 네이버 API에서 사용자 정보 요청
-        // 예시: https://openapi.naver.com/v1/nid/me
-        Toast.makeText(this, "사용자 정보 가져오기 시작", Toast.LENGTH_SHORT).show()
-
-        // 실제 API 호출 코드를 추가할 필요 있음 (사용자 정보를 받아오는 부분)
     }
 
 
