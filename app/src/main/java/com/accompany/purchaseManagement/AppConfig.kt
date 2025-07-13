@@ -31,7 +31,7 @@ object AppConfig {
     const val LARGE_BUTTON_WIDTH = 280 // dp
 
     // 🔗 도움말 URL (선택사항)
-    const val HELP_URL = "https://docs.google.com/document/d/https://docs.google.com/document/d/13bmlpzMjyv77LrJvbvTM42j2tnJJ8a5UZVQqkyLuX1E/edit?tab=t.0/edit"
+    const val HELP_URL = "https://docs.google.com/document/d/13bmlpzMjyv77LrJvbvTM42j2tnJJ8a5UZVQqkyLuX1E/edit?tab=t.0"
 
     /**
      * 설정 검증 메소드

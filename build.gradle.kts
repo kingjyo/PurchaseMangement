@@ -6,7 +6,7 @@ buildscript {
         maven { url = uri("https://jitpack.io") }  // Correct syntax for specifying the JitPack repository
     }
     dependencies {
-        classpath("com.google.gms:google-services:4.4.0")
+        classpath("com.google.gms:google-services:4.4.2")
     }
 }
 
