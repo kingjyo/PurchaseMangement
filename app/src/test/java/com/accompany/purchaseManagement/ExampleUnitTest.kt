@@ -1,4 +1,4 @@
-package com.accompany.purchaserequest
+package com.accompany.purchaseManagement
 
 import org.junit.Test
 

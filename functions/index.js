@@ -47,7 +47,7 @@ async function notifyAdmin(title, body) {
 // 구매요청 Firestore 트리거 (v2 API)
 exports.onNewPurchaseRequest = onDocumentCreated(
     {
-      document: "users/{id}",
+      document: "purchaseRequests/{id}",
       region: "asia-northeast3",
     },
     async (event) => {

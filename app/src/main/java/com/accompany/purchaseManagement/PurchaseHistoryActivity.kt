@@ -42,28 +42,23 @@ class PurchaseHistoryActivity : AppCompatActivity() {
     }
 
     fun loadAllRequests() {
-        val allRequests = dbHelper.getAllRequests()  // PurchaseRequest로 반환된다고 가정
+        allRequests = dbHelper.getAllRequests()
 
-        // allRequests를 PurchaseRequestV2로 변환
+        // DB에서 가져온 데이터를 PurchaseRequestV2 형태로 변환 (부족한 필드는 기본값 사용)
         val allRequestsV2 = allRequests.map { request ->
             PurchaseRequestV2(
-                requestId = request.requestId,
+                id = request.id,
                 applicantName = request.applicantName,
                 applicantDepartment = request.applicantDepartment,
-                applicantEmail = request.applicantEmail,
+                applicantEmail = "",
                 equipmentName = request.equipmentName,
-                quantity = request.quantity,
+                quantity = "1",
                 location = request.location,
                 purpose = request.purpose,
                 note = request.note,
-                photoUrls = request.photoUrls,
                 requestDate = request.requestDate,
-                status = request.status,
-                modifiedDate = request.modifiedDate,
-                modifyCount = request.modifyCount,
-                processor = request.processor,
-                processedDate = request.processedDate,
-                processNote = request.processNote
+                status = request.status
+
             )
         }
 
