@@ -2,20 +2,23 @@ package com.accompany.purchaseManagement
 
 import android.app.Activity
 import android.content.Intent
-import android.os.Bundle
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
-import android.util.Log
 import android.widget.Toast
-import java.util.*
+import androidx.activity.result.ActivityResultLauncher
+import android.os.Bundle
 
-class SpeechRecognitionHelper(private val activity: Activity) {
+class SpeechRecognitionHelper(
+    private val activity: Activity,
+    private val launcher: ActivityResultLauncher<Intent>? = null  // Fragment에서 전달된 launcher
+) {
+
+    private var callback: SpeechRecognitionCallback? = null
+    private var speechRecognizer: SpeechRecognizer? = null  // SpeechRecognizer 객체
 
     companion object {
         private const val TAG = "SpeechRecognition"
     }
-
-    private var speechRecognizer: SpeechRecognizer? = null
 
     // 콜백 인터페이스
     interface SpeechRecognitionCallback {
@@ -25,8 +28,7 @@ class SpeechRecognitionHelper(private val activity: Activity) {
         fun onEndOfSpeech()
     }
 
-    private var callback: SpeechRecognitionCallback? = null
-
+    // 콜백 설정
     fun setCallback(callback: SpeechRecognitionCallback) {
         this.callback = callback
     }
@@ -36,55 +38,27 @@ class SpeechRecognitionHelper(private val activity: Activity) {
         return SpeechRecognizer.isRecognitionAvailable(activity)
     }
 
-    fun handleActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (resultCode == Activity.RESULT_OK && data != null) {
-            val result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
-            // Handle the result
-        }
-    }
-
-    // 단일 음성 인식 시작
+    // 음성 인식 시작
     fun startSingleRecognition() {
         if (!isRecognitionAvailable()) {
             Toast.makeText(activity, "음성 인식을 사용할 수 없습니다", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // 음성 인식 시작
-        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE, "ko-KR")  // 한국어
-            putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, activity.packageName)
-            putExtra(RecognizerIntent.EXTRA_PROMPT, "말씀해주세요")
-            putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
-        }
-
-        try {
-            activity.startActivityForResult(intent, 1000)  // 음성 인식 요청
-        } catch (e: Exception) {
-            Toast.makeText(activity, "음성 인식 시작 실패: ${e.message}", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    // SpeechRecognizer 설정
-    private fun setupSpeechRecognizer() {
+        // SpeechRecognizer 초기화
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(activity).apply {
             setRecognitionListener(object : android.speech.RecognitionListener {
                 override fun onReadyForSpeech(params: Bundle?) {
-                    Log.d(TAG, "음성 입력 준비됨")
                     callback?.onReadyForSpeech()
                 }
 
-                override fun onBeginningOfSpeech() {
-                    Log.d(TAG, "음성 입력 시작")
-                }
+                override fun onBeginningOfSpeech() {}
 
                 override fun onRmsChanged(rmsdB: Float) {}
 
                 override fun onBufferReceived(buffer: ByteArray?) {}
 
                 override fun onEndOfSpeech() {
-                    Log.d(TAG, "음성 입력 종료")
                     callback?.onEndOfSpeech()
                 }
 
@@ -101,16 +75,13 @@ class SpeechRecognitionHelper(private val activity: Activity) {
                         SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "음성 입력 시간초과"
                         else -> "알 수 없는 오류"
                     }
-                    Log.e(TAG, "음성 인식 오류: $errorMessage")
                     callback?.onError(errorMessage)
                 }
 
                 override fun onResults(results: Bundle?) {
                     val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                     if (!matches.isNullOrEmpty()) {
-                        val text = matches[0]
-                        Log.d(TAG, "인식 결과: $text")
-                        callback?.onResults(text)
+                        callback?.onResults(matches[0])  // 첫 번째 텍스트 전달
                     }
                 }
 
@@ -119,33 +90,47 @@ class SpeechRecognitionHelper(private val activity: Activity) {
                 override fun onEvent(eventType: Int, params: Bundle?) {}
             })
         }
-    }
 
-    // 음성 인식 시작
-    private fun startListening() {
+        // 음성 인식 인텐트 설정
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE, "ko-KR")
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, "ko-KR")  // 한국어
+            putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, activity.packageName)
+            putExtra(RecognizerIntent.EXTRA_PROMPT, "말씀해주세요")
             putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
-            putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
         }
 
-        speechRecognizer?.startListening(intent)
+        try {
+            // launcher가 있으면 launcher를 사용하여 음성 인식 시작
+            launcher?.launch(intent) ?: activity.startActivityForResult(intent, 1000)
+        } catch (e: Exception) {
+            Toast.makeText(activity, "음성 인식 시작 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+            callback?.onError("음성 인식 시작 실패: ${e.message}")
+        }
     }
 
-    // 음성 인식 중지
+    // stopListening() 메서드 추가: 음성 인식 중지
     fun stopListening() {
         speechRecognizer?.stopListening()
         speechRecognizer?.cancel()
-        speechRecognizer?.destroy()
-        speechRecognizer = null
     }
 
-    // 리소스 정리
+    // 리소스 정리 메서드
     fun destroy() {
         stopListening()
+        speechRecognizer?.destroy() // SpeechRecognizer 리소스를 해제
+        speechRecognizer = null  // 참조 제거
     }
 
-    // Activity Result 처리 (더 이상 사용되지 않음)
-    // 음성 인식은 RecognitionListener를 통해 처리되므로 이 부분은 제거할 수 있습니다.
+    // ActivityResult 처리 (음성 인식 결과 처리)
+    fun handleActivityResult(resultCode: Int, data: Intent?) {
+        if (resultCode == Activity.RESULT_OK && data != null) {
+            val results = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+            if (!results.isNullOrEmpty()) {
+                callback?.onResults(results[0])  // 인식된 첫 번째 텍스트를 콜백으로 전달
+            }
+        } else {
+            callback?.onError("음성 인식 취소됨")
+        }
+    }
 }

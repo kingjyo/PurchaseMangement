@@ -5,17 +5,9 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="24dp"
-    android:gravity="center">
+    android:gravity="center_horizontal">
 
-    <!-- 아이콘 -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="🔢"
-        android:textSize="64sp"
-        android:layout_marginBottom="24dp" />
-
-    <!-- 제목 -->
+    <!-- 수량 텍스트 -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -23,88 +15,90 @@
         android:textSize="28sp"
         android:textStyle="bold"
         android:textColor="@color/text_primary"
-        android:layout_marginBottom="8dp" />
+        android:layout_marginBottom="8dp"
+        android:gravity="center"/>
 
-    <!-- 설명 -->
+    <!-- 설명 텍스트 -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="몇 개가 필요하신가요?"
         android:textSize="16sp"
         android:textColor="@color/text_secondary"
-        android:layout_marginBottom="32dp" />
+        android:layout_marginBottom="32dp"
+        android:gravity="center"/>
 
-    <!-- 수량 입력 -->
     <LinearLayout
+        android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center"
+    android:layout_marginBottom="24dp">
+
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:layout_marginBottom="24dp">
+    android:layout_height="wrap_content"
+    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+    app:boxStrokeColor="@color/primary_color"
+    app:hintTextColor="@color/primary_color">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:layout_width="120dp"
-            android:layout_height="wrap_content"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            app:boxStrokeColor="@color/primary_color"
-            app:hintTextColor="@color/primary_color">
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/etQuantity"
+        android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:hint="수량"
+    android:inputType="number"
+    android:textSize="24sp"
+    android:gravity="center"
+    android:text="1" />
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/etQuantity"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="수량"
-                android:inputType="number"
-                android:textSize="24sp"
-                android:gravity="center"
-                android:text="1" />
+</com.google.android.material.textfield.TextInputLayout>
 
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <TextView
-            android:id="@+id/tvUnit"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="개"
-            android:textSize="24sp"
-            android:textColor="@color/text_primary"
-            android:layout_marginStart="16dp" />
+<TextView
+android:id="@+id/tvUnit"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="개"
+android:textSize="24sp"
+android:textColor="@color/text_primary"
+android:layout_marginStart="16dp" />
 
     </LinearLayout>
 
-    <!-- 빠른 선택 버튼들 -->
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="16dp">
 
-        <com.google.android.material.chip.Chip
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="1"
-            android:layout_marginEnd="8dp"
-            style="@style/Widget.MaterialComponents.Chip.Choice" />
+<LinearLayout
+android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center"
+    android:layout_marginTop="16dp">
 
-        <com.google.android.material.chip.Chip
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="5"
-            android:layout_marginEnd="8dp"
-            style="@style/Widget.MaterialComponents.Chip.Choice" />
+<com.google.android.material.chip.Chip
+style="@style/Widget.MaterialComponents.Chip.Choice"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:layout_marginEnd="8dp"
+android:text="1" />
 
-        <com.google.android.material.chip.Chip
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="10"
-            android:layout_marginEnd="8dp"
-            style="@style/Widget.MaterialComponents.Chip.Choice" />
+<com.google.android.material.chip.Chip
+style="@style/Widget.MaterialComponents.Chip.Choice"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:layout_marginEnd="8dp"
+android:text="5" />
 
-        <com.google.android.material.chip.Chip
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="20"
-            style="@style/Widget.MaterialComponents.Chip.Choice" />
+<com.google.android.material.chip.Chip
+style="@style/Widget.MaterialComponents.Chip.Choice"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:layout_marginEnd="8dp"
+android:text="10" />
+
+<com.google.android.material.chip.Chip
+style="@style/Widget.MaterialComponents.Chip.Choice"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="20" />
 
     </LinearLayout>
 

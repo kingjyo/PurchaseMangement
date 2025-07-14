@@ -1,34 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
+    android:layout_height="match_parent"
     android:padding="16dp">
 
-    <EditText
-        android:id="@+id/etPurpose"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="구매 목적이나 용도를 입력하세요"
-        android:textSize="18sp"
-        android:inputType="text" />
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
-    <TextView
-        android:id="@+id/tvExamples"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="💡 예시:\n• 사료 배합 작업\n• 트랙터 수리\n• 축사 환경 개선\n• 장비 교체\n\n🎤 마이크 버튼을 눌러 음성으로 입력할 수 있습니다"
-        android:textSize="14sp"
-        android:textColor="#777"
-        android:layout_marginTop="8dp" />
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:paddingBottom="80dp">
 
+            <!-- 용도 입력 텍스트 -->
+            <EditText
+                android:id="@+id/etPurpose"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:hint="용도를 입력하세요"
+                android:inputType="textMultiLine"
+                android:gravity="top|start"
+                android:textSize="16sp"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/edittext_background"
+                android:padding="16dp"/>
+
+            <!-- 예시 텍스트 -->
+            <TextView
+                android:id="@+id/tvExamples"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="💡 예시:\n• 사료 배합 작업\n• 트랙터 수리\n• 축사 환경 개선\n• 장비 교체"
+                android:textSize="14sp"
+                android:textColor="#777"
+                android:layout_marginBottom="24dp"
+                android:gravity="center"/>
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- 마이크 버튼 -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabMic"
         android:layout_width="56dp"
         android:layout_height="56dp"
-        android:layout_gravity="end"
-        android:layout_marginTop="16dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
         android:src="@drawable/ic_mic"
         android:contentDescription="음성 입력 버튼" />
-
-</LinearLayout>
+</RelativeLayout>

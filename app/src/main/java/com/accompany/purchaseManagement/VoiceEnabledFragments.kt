@@ -21,40 +21,38 @@ import android.speech.RecognizerIntent
 import android.app.Activity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import android.widget.Toast
+
 
 
 
 // 1. 음성 입력이 가능한 기본 Fragment
+// VoiceEnabledFragment.kt
+
 abstract class VoiceEnabledFragment : Fragment() {
 
     protected lateinit var speechHelper: SpeechRecognitionHelper
+    private lateinit var speechResultLauncher: ActivityResultLauncher<Intent>
     protected var micButton: FloatingActionButton? = null
     protected var isVoiceMode = false
 
-    // 음성 인식 결과를 처리할 launcher를 추가합니다.
-    private val speechResultLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                val data = result.data
-                speechHelper.handleActivityResult(
-                    result.resultCode,
-                    result.resultCode,
-                    data
-                )
-            }
-        }
-
-    companion object {
-        private const val REQUEST_RECORD_AUDIO_PERMISSION = 200
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // launcher 등록
+        speechResultLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            speechHelper.handleActivityResult(result.resultCode, result.data)
+        }
+
+        // SpeechRecognitionHelper에 launcher 전달
         activity?.let {
-            speechHelper = SpeechRecognitionHelper(it)
+            speechHelper = SpeechRecognitionHelper(it, speechResultLauncher)
         }
     }
 
+    // 음성 입력 설정
     open fun setupVoiceInput(editText: EditText, micButton: FloatingActionButton) {
         this.micButton = micButton
 
@@ -111,17 +109,7 @@ abstract class VoiceEnabledFragment : Fragment() {
         }
     }
 
-    protected fun startSpeechRecognition() {
-        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-            putExtra(RecognizerIntent.EXTRA_LANGUAGE, "ko-KR")
-            putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, requireActivity().packageName)
-            putExtra(RecognizerIntent.EXTRA_PROMPT, "말씀해주세요")
-            putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
-        }
-        speechResultLauncher.launch(intent)
-    }
-
+    // 마이크 버튼 상태 업데이트
     protected fun updateMicButtonState(isActive: Boolean) {
         micButton?.apply {
             if (isActive) {
@@ -134,6 +122,7 @@ abstract class VoiceEnabledFragment : Fragment() {
         }
     }
 
+    // 오디오 권한 확인
     protected fun checkAudioPermission(): Boolean {
         return ContextCompat.checkSelfPermission(
             requireContext(),
@@ -141,12 +130,22 @@ abstract class VoiceEnabledFragment : Fragment() {
         ) == PackageManager.PERMISSION_GRANTED
     }
 
+    // 오디오 권한 요청
     protected fun requestAudioPermission() {
-        ActivityCompat.requestPermissions(
-            requireActivity(),
-            arrayOf(Manifest.permission.RECORD_AUDIO),
-            REQUEST_RECORD_AUDIO_PERMISSION
-        )
+        requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+    }
+
+    // 권한 요청 결과 처리
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            isVoiceMode = true
+            updateMicButtonState(true)
+            speechHelper.startSingleRecognition()  // 권한 부여되면 음성 인식 시작
+        } else {
+            Toast.makeText(requireContext(), "음성인식을 위해 마이크 권한이 필요합니다", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onDestroy() {

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:gravity="start"> <!-- 상단 정렬로 변경 -->
+
+    <!-- 장소 입력 -->
+    <EditText
+        android:id="@+id/etLocation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="장소를 입력하세요 (선택사항)"
+        android:textSize="18sp"
+        android:inputType="textMultiLine"
+        android:minLines="3"
+        android:layout_marginBottom="16dp" /> <!-- 여백 추가 -->
+
+    <!-- 선택사항 설명 -->
+    <TextView
+        android:id="@+id/tvOptional"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="💡 선택사항이나 적어주시면 많은 도움이 됩니다."
+        android:textSize="14sp"
+        android:textColor="#777"
+        android:layout_marginBottom="16dp" /> <!-- 여백 추가 -->
+
+    <!-- 음성 입력 버튼 -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabMic"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_gravity="end"
+        android:layout_marginTop="16dp"
+        android:src="@drawable/ic_mic"
+        android:contentDescription="음성 입력 버튼" />
+</LinearLayout>

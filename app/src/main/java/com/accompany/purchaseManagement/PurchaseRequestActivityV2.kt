@@ -2,13 +2,18 @@ package com.accompany.purchaseManagement
 
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.View
 import android.widget.*
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
@@ -27,7 +32,9 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
     companion object {
         private const val REQUEST_IMAGE_CAPTURE = 1
         private const val REQUEST_IMAGE_PICK = 2
+        private const val REQUEST_CODE_PERMISSIONS = 100
     }
+
 
     // ViewPager 관련
     private lateinit var viewPager: ViewPager2
@@ -35,6 +42,7 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
     private lateinit var btnPrevious: Button
     private lateinit var btnNext: Button
     private lateinit var progressBar: ProgressBar
+    private var currentPhotoUri: Uri? = null
 
     // 사용자 정보
     private lateinit var googleAuthHelper: GoogleAuthHelper
@@ -47,6 +55,22 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
     private var purpose = ""
     private var note = ""
     var photoUris = mutableListOf<Uri>()
+    private val viewModel: PurchaseViewModel by viewModels()
+    // 사진 촬영을 위한 ActivityResultLauncher
+    private val photoCaptureLauncher =
+        registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+            if (success) {
+                // 이미 저장된 currentPhotoUri 사용
+                currentPhotoUri?.let { uri ->
+                    photoUris.add(uri)
+                    // PhotoFragment 업데이트
+                    val fragment = supportFragmentManager
+                        .findFragmentByTag("f${viewPager.currentItem}") as? PhotoFragment
+                    fragment?.onPhotoAdded()
+                }
+            }
+            currentPhotoUri = null // 사용 후 초기화
+        }
 
     // Firebase
     private val db = FirebaseFirestore.getInstance()
@@ -58,6 +82,19 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_purchase_request_v2)
+
+        viewPager = findViewById(R.id.viewPager)
+        btnPrevious = findViewById(R.id.btnPrevious)
+        btnNext = findViewById(R.id.btnNext)
+
+        // 슬라이드로 페이지 전환 비활성화
+        viewPager.isUserInputEnabled = false
+
+        btnPrevious.setOnClickListener {
+            if (viewPager.currentItem > 0) {
+                viewPager.currentItem = viewPager.currentItem - 1
+            }
+        }
 
         supportActionBar?.title = "구매신청"
 
@@ -86,11 +123,12 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
         }
 
         btnNext.setOnClickListener {
+            // 유효성 검사 수행
             if (validateCurrentPage()) {
                 if (viewPager.currentItem < 5) { // 총 6페이지
                     viewPager.currentItem = viewPager.currentItem + 1
                 } else {
-                    submitPurchaseRequest()
+                    submitPurchaseRequest()  // 최종 제출
                 }
             }
         }
@@ -136,70 +174,42 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
     private fun validateCurrentPage(): Boolean {
         return when (viewPager.currentItem) {
             0 -> { // 장비명
-                val fragment = supportFragmentManager.findFragmentByTag("f${viewPager.currentItem}")
-                        as? EquipmentNameFragment
-                equipmentName = fragment?.getEquipmentName() ?: ""
-                if (equipmentName.isEmpty()) {
-                    Toast.makeText(this, "장비명/품목을 입력해주세요", Toast.LENGTH_SHORT).show()
-                    false
-                } else true
+                val fragment = supportFragmentManager.findFragmentByTag("f0") as? EquipmentNameFragment
+                fragment?.isEquipmentNameValid() ?: false
             }
             1 -> { // 수량
-                val fragment = supportFragmentManager.findFragmentByTag("f${viewPager.currentItem}")
-                        as? QuantityFragment
-                quantity = fragment?.getQuantity() ?: "1"
-                if (quantity.isEmpty() || quantity.toIntOrNull() == null || quantity.toInt() <= 0) {
+                if (!viewModel.isQuantityValid()) {
                     Toast.makeText(this, "올바른 수량을 입력해주세요", Toast.LENGTH_SHORT).show()
                     false
                 } else true
             }
-            2 -> { // 장소 (선택)
-                val fragment = supportFragmentManager.findFragmentByTag("f${viewPager.currentItem}")
-                        as? LocationFragment
-                location = fragment?.getLocation() ?: ""
-                true
-            }
+            2 -> true  // 장소 (선택사항)
             3 -> { // 용도
-                val fragment = supportFragmentManager.findFragmentByTag("f${viewPager.currentItem}")
-                        as? PurposeFragment
-                purpose = fragment?.getPurpose() ?: ""
-                if (purpose.isEmpty()) {
-                    Toast.makeText(this, "사용 용도를 입력해주세요", Toast.LENGTH_SHORT).show()
-                    false
-                } else true
+                val fragment = supportFragmentManager.findFragmentByTag("f3") as? PurposeFragment
+                fragment?.isPurposeValid() ?: false
             }
-            4 -> { // 기타사항 (선택)
-                val fragment = supportFragmentManager.findFragmentByTag("f${viewPager.currentItem}")
-                        as? NoteFragment
-                note = fragment?.getNote() ?: ""
-                true
-            }
-            5 -> { // 사진 (선택)
-                val fragment = supportFragmentManager.findFragmentByTag("f${viewPager.currentItem}")
-                        as? PhotoFragment
-                photoUris.clear()
-                photoUris.addAll(fragment?.getPhotoUris() ?: emptyList())
-                true
-            }
+            4 -> true  // 기타사항 (선택사항)
+            5 -> true  // 사진 (선택사항)
             else -> true
         }
     }
 
+
+
+
+
+    // 구매신청 제출
     private fun submitPurchaseRequest() {
-        // 사용자 정보 확인
         if (currentUser == null) {
             Toast.makeText(this, "로그인 정보를 확인할 수 없습니다", Toast.LENGTH_SHORT).show()
             return
         }
-
-        // 최종 확인 다이얼로그
         showSubmitConfirmDialog()
     }
 
     private fun showSubmitConfirmDialog() {
         val message = """
             📋 구매신청 내용 확인
-            
             👤 신청자: ${currentUser?.name} (${currentUser?.department})
             🔧 장비명: $equipmentName
             🔢 수량: $quantity
@@ -214,34 +224,31 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
         AlertDialog.Builder(this)
             .setTitle("구매신청 확인")
             .setMessage(message)
-            .setPositiveButton("제출") { _, _ ->
-                performSubmit()
-            }
+            .setPositiveButton("제출") { _, _ -> performSubmit() }
             .setNegativeButton("취소", null)
             .show()
     }
 
-// PurchaseRequestActivityV2_Part1.kt에서 이어서...
-
     private fun performSubmit() {
         btnNext.isEnabled = false
         progressBar.visibility = View.VISIBLE
-
         val applicantName = currentUser?.name ?: "미설정"
         val applicantDepartment = currentUser?.department ?: "미설정"
         val applicantEmail = currentUser?.email ?: ""
         val requestDate = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.KOREA).format(Date())
 
+        equipmentName = viewModel.equipmentName.value ?: ""
+        quantity = viewModel.quantity.value ?: "1"
+        location = viewModel.location.value ?: ""
+        purpose = viewModel.purpose.value ?: ""
+        note = viewModel.note.value ?: ""
+
         lifecycleScope.launch {
             try {
-                // 1. 사진 업로드 (있을 경우)
-                val photoUrls = if (photoUris.isNotEmpty()) {
-                    uploadPhotos(photoUris)
-                } else {
-                    emptyList()
-                }
+                // 사진 업로드
+                val photoUrls = if (photoUris.isNotEmpty()) uploadPhotos(photoUris) else emptyList()
 
-                // 2. Firestore에 저장
+                // Firestore에 저장
                 val requestData = hashMapOf(
                     "applicantName" to applicantName,
                     "applicantDepartment" to applicantDepartment,
@@ -263,41 +270,24 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
 
                 val requestId = docRef.id
 
-                // 3. 로컬 DB 저장 (백업)
-                dbHelper.insertPurchaseRequest(
-                    applicantName, applicantDepartment, equipmentName,
-                    location, purpose, note, requestDate, PurchaseStatus.PENDING.displayName
-                )
+                // 로컬 DB 저장
+                dbHelper.insertPurchaseRequest(applicantName, applicantDepartment, equipmentName, location, purpose, note, requestDate, PurchaseStatus.PENDING.displayName)
 
-                // 4. Google Sheets 저장
+                // Google Sheets 저장
                 val googleSheetsHelper = GoogleSheetsHelper(this@PurchaseRequestActivityV2)
-                val sheetsSuccess = googleSheetsHelper.submitToGoogleSheets(
-                    applicantName, applicantDepartment, equipmentName,
-                    location, purpose, note, requestDate,
-                    hasPhoto = photoUrls.isNotEmpty(),
-                    photoUrls = photoUrls.joinToString(",")
-                )
+                val sheetsSuccess = googleSheetsHelper.submitToGoogleSheets(applicantName, applicantDepartment, equipmentName, location, purpose, note, requestDate, hasPhoto = photoUrls.isNotEmpty(), photoUrls = photoUrls.joinToString(","))
 
-                // 5. 이메일 전송
-                emailHelper.sendPurchaseRequestEmail(
-                    applicantName, applicantDepartment, equipmentName,
-                    quantity, location, purpose, note, requestDate, photoUrls
-                )
+                // 이메일 전송
+                emailHelper.sendPurchaseRequestEmail(applicantName, applicantDepartment, equipmentName, quantity, location, purpose, note, requestDate, photoUrls)
 
-                // 6. 관리자에게 FCM 알림
-                fcmHelper.notifyAdminNewRequest(
-                    applicantName, equipmentName, requestId
-                )
+                // 관리자에게 FCM 알림
+                fcmHelper.notifyAdminNewRequest(applicantName, equipmentName, requestId)
 
                 // 성공 처리
                 showSuccessDialog()
 
             } catch (e: Exception) {
-                Toast.makeText(
-                    this@PurchaseRequestActivityV2,
-                    "제출 중 오류가 발생했습니다: ${e.message}",
-                    Toast.LENGTH_LONG
-                ).show()
+                Toast.makeText(this@PurchaseRequestActivityV2, "제출 중 오류가 발생했습니다: ${e.message}", Toast.LENGTH_LONG).show()
             } finally {
                 btnNext.isEnabled = true
                 progressBar.visibility = View.GONE
@@ -307,30 +297,20 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
 
     private suspend fun uploadPhotos(uris: List<Uri>): List<String> {
         val urls = mutableListOf<String>()
-
         for (uri in uris) {
             val filename = "purchase_photos/${System.currentTimeMillis()}_${(0..9999).random()}.jpg"
             val ref = storage.reference.child(filename)
-
             ref.putFile(uri).await()
             val url = ref.downloadUrl.await().toString()
             urls.add(url)
         }
-
         return urls
     }
 
     private fun showSuccessDialog() {
         AlertDialog.Builder(this)
             .setTitle("✅ 구매신청 완료")
-            .setMessage("""
-                구매신청이 성공적으로 제출되었습니다!
-                
-                📊 관리자가 실시간으로 확인할 수 있습니다
-                📧 상세 내용이 이메일로 전송되었습니다
-                
-                구매신청 현황에서 진행상황을 확인하세요.
-            """.trimIndent())
+            .setMessage("""구매신청이 성공적으로 제출되었습니다!""")
             .setPositiveButton("확인") { _, _ ->
                 setResult(Activity.RESULT_OK)
                 finish()
@@ -339,21 +319,49 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
             .show()
     }
 
-    // 카메라/갤러리 관련 메서드들
+    // 카메라 권한을 확인하고, 권한이 없으면 권한을 요청합니다.
     fun openCamera() {
-        val photoFile = createImageFile()
-        val photoUri = FileProvider.getUriForFile(
-            this,
-            "${packageName}.fileprovider",
-            photoFile
-        )
-        photoUris.add(photoUri)
-
-        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE).apply {
-            putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+        // 카메라 권한이 없으면 권한을 요청
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            // 권한 요청
+            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.CAMERA), REQUEST_CODE_PERMISSIONS)
+        } else {
+            // 권한이 이미 있으면 카메라 실행
+            val photoFile = createImageFile()
+            currentPhotoUri = FileProvider.getUriForFile(
+                this,
+                "${packageName}.fileprovider",
+                photoFile
+            )
+            currentPhotoUri?.let { uri ->
+                photoCaptureLauncher.launch(uri)
+            }
         }
-        startActivityForResult(intent, REQUEST_IMAGE_CAPTURE)
     }
+
+    // 권한 요청 결과 처리
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == REQUEST_CODE_PERMISSIONS) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // 권한이 허용되었으면 카메라 실행
+                openCamera()
+            } else {
+                // 권한이 거부되었을 때 처리
+                Toast.makeText(this, "카메라 권한이 거부되었습니다. 권한을 허용해야 카메라를 사용할 수 있습니다.", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+
+    // 사진을 저장할 파일 생성
+    private fun createImageFile(): File {
+        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.KOREA).format(Date())
+        val storageDir = getExternalFilesDir(android.os.Environment.DIRECTORY_PICTURES)
+        return File.createTempFile("IMG_${timeStamp}_", ".jpg", storageDir)
+    }
+
 
     fun openGallery() {
         val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
@@ -363,11 +371,6 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
         startActivityForResult(Intent.createChooser(intent, "사진 선택"), REQUEST_IMAGE_PICK)
     }
 
-    private fun createImageFile(): File {
-        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.KOREA).format(Date())
-        val storageDir = getExternalFilesDir(android.os.Environment.DIRECTORY_PICTURES)
-        return File.createTempFile("IMG_${timeStamp}_", ".jpg", storageDir)
-    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -376,7 +379,6 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
 
         when (requestCode) {
             REQUEST_IMAGE_CAPTURE -> {
-                // PhotoFragment에 전달
                 val fragment = supportFragmentManager.findFragmentByTag("f5") as? PhotoFragment
                 fragment?.onPhotoAdded()
             }
@@ -397,8 +399,3 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
         }
     }
 }
-
-// 전체 코드를 합치려면:
-// 1. PurchaseRequestActivityV2_Part1.kt의 내용을 복사
-// 2. "// PurchaseRequestActivityV2_Part2.kt에서 계속..." 부분을 삭제
-// 3. PurchaseRequestActivityV2_Part2.kt의 내용을 이어서 붙여넣기

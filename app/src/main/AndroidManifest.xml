@@ -24,8 +24,6 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <uses-permission android:name="android.permission.INTERNET"/>
 
-
-
     <!-- 카메라 하드웨어 (선택사항) -->
     <uses-feature
         android:name="android.hardware.camera"
@@ -75,6 +73,7 @@
             android:name=".LoginActivityV2"
             android:exported="true"
             android:windowSoftInputMode="adjustResize" />
+
 
         <activity
             android:name=".ProfileSetupActivity"
