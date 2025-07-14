@@ -30,75 +30,38 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:gravity="center"
-    android:layout_marginBottom="24dp">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginBottom="24dp">
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-    app:boxStrokeColor="@color/primary_color"
-    app:hintTextColor="@color/primary_color">
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            app:boxStrokeColor="@color/primary_color"
+            app:hintTextColor="@color/primary_color">
 
-    <com.google.android.material.textfield.TextInputEditText
-        android:id="@+id/etQuantity"
-        android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:hint="수량"
-    android:inputType="number"
-    android:textSize="24sp"
-    android:gravity="center"
-    android:text="1" />
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etQuantity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="수량"
+                android:inputType="number"
+                android:textSize="24sp"
+                android:gravity="center"
+                android:text="1" />
 
-</com.google.android.material.textfield.TextInputLayout>
+        </com.google.android.material.textfield.TextInputLayout>
 
-<TextView
-android:id="@+id/tvUnit"
-android:layout_width="wrap_content"
-android:layout_height="wrap_content"
-android:text="개"
-android:textSize="24sp"
-android:textColor="@color/text_primary"
-android:layout_marginStart="16dp" />
-
-    </LinearLayout>
-
-
-<LinearLayout
-android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:gravity="center"
-    android:layout_marginTop="16dp">
-
-<com.google.android.material.chip.Chip
-style="@style/Widget.MaterialComponents.Chip.Choice"
-android:layout_width="wrap_content"
-android:layout_height="wrap_content"
-android:layout_marginEnd="8dp"
-android:text="1" />
-
-<com.google.android.material.chip.Chip
-style="@style/Widget.MaterialComponents.Chip.Choice"
-android:layout_width="wrap_content"
-android:layout_height="wrap_content"
-android:layout_marginEnd="8dp"
-android:text="5" />
-
-<com.google.android.material.chip.Chip
-style="@style/Widget.MaterialComponents.Chip.Choice"
-android:layout_width="wrap_content"
-android:layout_height="wrap_content"
-android:layout_marginEnd="8dp"
-android:text="10" />
-
-<com.google.android.material.chip.Chip
-style="@style/Widget.MaterialComponents.Chip.Choice"
-android:layout_width="wrap_content"
-android:layout_height="wrap_content"
-android:text="20" />
+        <TextView
+            android:id="@+id/tvUnit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="개"
+            android:textSize="24sp"
+            android:textColor="@color/text_primary"
+            android:layout_marginStart="16dp" />
 
     </LinearLayout>
 

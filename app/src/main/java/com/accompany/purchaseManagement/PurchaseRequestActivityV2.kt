@@ -209,17 +209,17 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
 
     private fun showSubmitConfirmDialog() {
         val message = """
-            📋 구매신청 내용 확인
-            👤 신청자: ${currentUser?.name} (${currentUser?.department})
-            🔧 장비명: $equipmentName
-            🔢 수량: $quantity
-            ${if (location.isNotEmpty()) "📍 장소: $location\n" else ""}
-            📝 용도: $purpose
-            ${if (note.isNotEmpty()) "💬 기타: $note\n" else ""}
-            📸 사진: ${photoUris.size}장
-            
-            위 내용으로 구매신청을 제출하시겠습니까?
-        """.trimIndent()
+        📋 구매신청 내용 확인
+        👤 신청자: ${currentUser?.name} (${currentUser?.department})
+        🔧 장비명: $equipmentName
+        🔢 수량: $quantity
+        ${if (location.isNotEmpty()) "📍 장소: $location\n" else ""}
+        📝 용도: $purpose
+        ${if (note.isNotEmpty()) "💬 기타: $note\n" else ""}
+        📸 사진: ${photoUris.size}장
+
+        위 내용으로 구매신청을 제출하시겠습니까?
+    """.trimIndent()
 
         AlertDialog.Builder(this)
             .setTitle("구매신청 확인")
@@ -237,16 +237,24 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
         val applicantEmail = currentUser?.email ?: ""
         val requestDate = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.KOREA).format(Date())
 
+        // 데이터 가져오기 (ViewModel 또는 각 Fragment에서 값 가져오기)
         equipmentName = viewModel.equipmentName.value ?: ""
         quantity = viewModel.quantity.value ?: "1"
         location = viewModel.location.value ?: ""
         purpose = viewModel.purpose.value ?: ""
         note = viewModel.note.value ?: ""
 
+        // 사진 업로드
+        val hasPhoto = photoUris.isNotEmpty()
+
         lifecycleScope.launch {
             try {
-                // 사진 업로드
-                val photoUrls = if (photoUris.isNotEmpty()) uploadPhotos(photoUris) else emptyList()
+                // 사진 업로드 처리 (비동기로 기다림)
+                val photoUrls = if (hasPhoto) {
+                    uploadPhotos(photoUris) // uploadPhotos가 suspend 함수로 정의되어 있어야 함
+                } else {
+                    emptyList<String>()
+                }
 
                 // Firestore에 저장
                 val requestData = hashMapOf(
@@ -258,7 +266,7 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
                     "location" to location,
                     "purpose" to purpose,
                     "note" to note,
-                    "photoUrls" to photoUrls,
+                    "photoUrls" to photoUrls.joinToString(","),
                     "requestDate" to requestDate,
                     "status" to PurchaseStatus.PENDING.displayName,
                     "modifyCount" to 0
@@ -275,7 +283,11 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
 
                 // Google Sheets 저장
                 val googleSheetsHelper = GoogleSheetsHelper(this@PurchaseRequestActivityV2)
-                val sheetsSuccess = googleSheetsHelper.submitToGoogleSheets(applicantName, applicantDepartment, equipmentName, location, purpose, note, requestDate, hasPhoto = photoUrls.isNotEmpty(), photoUrls = photoUrls.joinToString(","))
+                val sheetsSuccess = googleSheetsHelper.submitToGoogleSheets(
+                    applicantName, applicantDepartment, equipmentName, location, purpose, note, requestDate,
+                    hasPhoto = hasPhoto,
+                    photoUrls = photoUrls.joinToString(",") // 사진 URL들을 콤마로 구분
+                )
 
                 // 이메일 전송
                 emailHelper.sendPurchaseRequestEmail(applicantName, applicantDepartment, equipmentName, quantity, location, purpose, note, requestDate, photoUrls)
@@ -295,6 +307,7 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
         }
     }
 
+    // 사진 업로드 (suspend 함수)
     private suspend fun uploadPhotos(uris: List<Uri>): List<String> {
         val urls = mutableListOf<String>()
         for (uri in uris) {

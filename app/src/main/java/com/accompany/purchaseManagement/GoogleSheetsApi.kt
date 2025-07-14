@@ -1,14 +1,26 @@
-package com.accompany.purchaseManagement
+package com.accompany.purchaseManagement.api
 
+import com.accompany.purchaseManagement.data.SheetResponse
 import retrofit2.Call
-import retrofit2.http.GET
+import retrofit2.http.*
 
 interface GoogleSheetsApi {
-    @GET("https://script.google.com/macros/s/AKfycbwrVEWgXV8_hf686Q67jmOU0Dv9Z6iUUsZMYliRyTBavj31NGDYYhwPTIzG6GL3309YjA/exec")  // Apps Script 도메인 URL 넣기
-    suspend fun getPurchaseRequests(): List<PurchaseRequestV2>
+
+    @POST("https://script.google.com/macros/s/AKfycbxqugzxUsgEz3rEjqKVtOkZb7vau1dS0O0Ec8H6Xc4HAorzOtaAbP_2o4ELYdRX32GTsQ/exec")
+    @FormUrlEncoded
+    fun addPurchaseRequest(
+        @Field("action") action: String = "addRequest",
+        @Field("접수시간") requestTime: String,
+        @Field("신청자명") applicantName: String,
+        @Field("소속") department: String,
+        @Field("장비품목명") equipmentName: String,
+        @Field("수량") quantity: String,
+        @Field("장소") location: String,
+        @Field("용도") purpose: String,
+        @Field("기타사항") note: String,
+        @Field("상태") status: String,
+        @Field("사진첨부") photoUrls: String,
+        @Field("처리완료일자") completedDate: String = ""
+    ): Call<SheetResponse>
 }
 
-interface CattleStatusApi {
-    @GET("https://script.google.com/macros/s/AKfycbzUPcgAfT0WUb47HDvdfYY-wQrtsxkDseovQRxgFOaoWm4KzsxR8bXDU2q5M7JtQAOHJA/exec") // 예시: "exec" 뒤에 "/"
-    suspend fun getCattleList(): List<Cattle>
-}

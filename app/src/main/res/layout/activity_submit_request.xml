@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <!-- Purpose Fragment -->
+    <FrameLayout
+        android:id="@+id/fragmentContainerPurpose"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <!-- Quantity Fragment -->
+    <FrameLayout
+        android:id="@+id/fragmentContainerQuantity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <!-- Equipment Name Fragment -->
+    <FrameLayout
+        android:id="@+id/fragmentContainerEquipmentName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <!-- Note Fragment -->
+    <FrameLayout
+        android:id="@+id/fragmentContainerNote"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <!-- Location Fragment -->
+    <FrameLayout
+        android:id="@+id/fragmentContainerLocation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <!-- Submit Button (Optional) -->
+    <FloatingActionButton
+        android:id="@+id/fabSubmit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_submit" />
+
+</LinearLayout>

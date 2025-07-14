@@ -14,7 +14,7 @@ object AppConfig {
     // 📊 Google Apps Script 웹앱 URL
     // 🔥 Google Apps Script 설정 후 실제 URL로 변경 필수!
     // 예시: "https://script.google.com/macros/s/AKfycby123ABC.../exec"
-    const val GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbyJH2s2lLmzJTVXcvX_320chCpZTkAZoKlPF_asMSXUf8ej8Xvhcp5uTwAkcte26wbVmw/exec"
+    const val GOOGLE_SHEETS_URL = "https://docs.google.com/spreadsheets/d/1LvJYb5rmTMa_YzXmVjVcJHdQV3I5atBjGISM64b1gU4/edit?gid=0#gid=0"
 
     // 📅 자동 데이터 정리 기간 (개월)
     const val AUTO_CLEANUP_MONTHS = 1000
@@ -46,12 +46,12 @@ object AppConfig {
         }
 
         // Google Sheets URL 검증 - 기본값에서 변경되었는지 확인
-        if (GOOGLE_SHEETS_URL.contains("https://script.google.com/macros/s/AKfycbyJH2s2lLmzJTVXcvX_320chCpZTkAZoKlPF_asMSXUf8ej8Xvhcp5uTwAkcte26wbVmw/exec")) {
+        if (GOOGLE_SHEETS_URL.contains("https://docs.google.com/spreadsheets/d/1LvJYb5rmTMa_YzXmVjVcJHdQV3I5atBjGISM64b1gU4/edit?gid=0#gid=0")) {
             errors.add("⚠️ GOOGLE_SHEETS_URL을 실제 Google Apps Script URL로 변경해주세요")
         }
 
         // URL 형식 검증 - 올바른 Apps Script URL 형식인지 확인
-        if (!GOOGLE_SHEETS_URL.startsWith("https://script.google.com/macros/s/AKfycbyJH2s2lLmzJTVXcvX_320chCpZTkAZoKlPF_asMSXUf8ej8Xvhcp5uTwAkcte26wbVmw/exec")) {
+        if (!GOOGLE_SHEETS_URL.startsWith("https://script.google.com/macros/s/AKfycbxqugzxUsgEz3rEjqKVtOkZb7vau1dS0O0Ec8H6Xc4HAorzOtaAbP_2o4ELYdRX32GTsQ/exec")) {
 
             errors.add("⚠️ GOOGLE_SHEETS_URL 형식이 올바르지 않습니다")
         }
