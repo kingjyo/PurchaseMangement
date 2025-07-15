@@ -18,8 +18,8 @@ class NaverAuthHelper(private val activity: Activity) {
         private const val TAG = "NaverAuthHelper"
 
         // 네이버 앱 정보 (네이버 개발자 센터에서 발급)
-        private const val NAVER_CLIENT_ID = "eKRvsHfNRW7o1D41_IEU"
-        private const val NAVER_CLIENT_SECRET = "r811KipLsH"
+        private const val NAVER_CLIENT_ID = "CLIENT_ID"
+        private const val NAVER_CLIENT_SECRET = "CLIENT_SECRET"
         private const val NAVER_CLIENT_NAME = "구매신청"
     }
 
