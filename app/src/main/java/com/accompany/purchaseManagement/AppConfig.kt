@@ -1,20 +1,11 @@
-package com.accompany.purchaseManagement
-
-/**
- * 구매신청 앱 설정값 관리
- *
- * ⚠️ 실제 사용 전에 반드시 아래 값들을 실제 값으로 변경해야 합니다!
- */
 object AppConfig {
 
     // 📧 관리자 이메일 주소 (사진 전송용)
-    // 🔥 실제 사용시 실제 관리자 이메일로 변경 필수!
     const val MANAGER_EMAIL = "clrns1234@gmail.com"
 
-    // 📊 Google Apps Script 웹앱 URL
-    // 🔥 Google Apps Script 설정 후 실제 URL로 변경 필수!
-    // 예시: "https://script.google.com/macros/s/AKfycby123ABC.../exec"
-    const val GOOGLE_SHEETS_URL = "https://docs.google.com/spreadsheets/d/1LvJYb5rmTMa_YzXmVjVcJHdQV3I5atBjGISM64b1gU4/edit?gid=0#gid=0"
+    // 📊 Google Apps Script 웹앱 URL (Google Sheets와 연동)
+    // 이곳에 실제 Google Apps Script URL을 넣으세요
+    const val GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbw9wp9dk_pdcwJHK8Im1n9db--dNu8lqSO9IQzZa1edlIJXOGyMa4HWs3pCBABRM3NVLA/exec"
 
     // 📅 자동 데이터 정리 기간 (개월)
     const val AUTO_CLEANUP_MONTHS = 1000
@@ -51,8 +42,7 @@ object AppConfig {
         }
 
         // URL 형식 검증 - 올바른 Apps Script URL 형식인지 확인
-        if (!GOOGLE_SHEETS_URL.startsWith("https://script.google.com/macros/s/AKfycbxqugzxUsgEz3rEjqKVtOkZb7vau1dS0O0Ec8H6Xc4HAorzOtaAbP_2o4ELYdRX32GTsQ/exec")) {
-
+        if (!GOOGLE_SHEETS_URL.startsWith("https://script.google.com/macros/s/")) {
             errors.add("⚠️ GOOGLE_SHEETS_URL 형식이 올바르지 않습니다")
         }
 
@@ -65,7 +55,7 @@ object AppConfig {
     fun getConfigSummary(): String {
         return """
             📧 관리자 이메일: $MANAGER_EMAIL
-            📊 Google Sheets: ${if (GOOGLE_SHEETS_URL.contains("YOUR_SCRIPT_ID_HERE")) "❌ 미설정" else "✅ 설정됨"}
+            📊 Google Sheets 연동: ${if (GOOGLE_SHEETS_URL.startsWith("https://script.google.com/macros/s/")) "✅ 설정됨" else "❌ 미설정"}
             📅 데이터 정리: ${AUTO_CLEANUP_MONTHS}개월
             📱 앱 버전: $APP_VERSION
             🔧 디버그: ${if (DEBUG_MODE) "ON" else "OFF"}

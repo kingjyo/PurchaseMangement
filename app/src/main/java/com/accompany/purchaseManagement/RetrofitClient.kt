@@ -1,6 +1,6 @@
 package com.accompany.purchaseManagement.network
 
-import com.accompany.purchaseManagement.api.GoogleSheetsApi
+import com.accompany.purchaseManagement.GoogleSheetsApi
 import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
     // Google Apps Script Web App URL
-    private const val BASE_URL = "https://script.google.com/macros/s/AKfycbztGcuycqeBAC9APkmrHwYNG7jOz25G2q1mSWDNbWNp8g0Ft1M28tz9Hsncdm5SEoTgdw/exec"
+    private const val BASE_URL = "https://script.google.com/macros/s/AKfycbw9wp9dk_pdcwJHK8Im1n9db--dNu8lqSO9IQzZa1edlIJXOGyMa4HWs3pCBABRM3NVLA/exec/"
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY

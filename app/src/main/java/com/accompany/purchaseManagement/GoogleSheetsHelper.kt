@@ -5,7 +5,6 @@ import android.util.Log
 import kotlinx.coroutines.*
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import com.accompany.purchaseManagement.api.GoogleSheetsApi
 import retrofit2.create
 import java.net.URLEncoder
 import java.text.SimpleDateFormat
@@ -15,7 +14,7 @@ class GoogleSheetsHelper(private val context: Context) {
 
     companion object {
         private const val TAG = "GoogleSheetsHelper"
-        private const val BASE_URL = "https://script.google.com/macros/s/AKfycbxqugzxUsgEz3rEjqKVtOkZb7vau1dS0O0Ec8H6Xc4HAorzOtaAbP_2o4ELYdRX32GTsQ/exec/"
+        private const val BASE_URL = "https://script.google.com/macros/s/AKfycbw9wp9dk_pdcwJHK8Im1n9db--dNu8lqSO9IQzZa1edlIJXOGyMa4HWs3pCBABRM3NVLA/exec/"
     }
 
     // Retrofit 초기화
@@ -31,6 +30,7 @@ class GoogleSheetsHelper(private val context: Context) {
         applicantName: String,
         applicantDepartment: String,
         equipmentName: String,
+        quantity: String,
         location: String,
         purpose: String,
         note: String,
@@ -40,12 +40,13 @@ class GoogleSheetsHelper(private val context: Context) {
     ): Boolean = withContext(Dispatchers.IO) {
         // POST 데이터 준비
         val postData = hashMapOf<String, String>(
-            "applicantName" to applicantName,
-            "applicantDepartment" to applicantDepartment,
-            "equipmentName" to equipmentName,
-            "location" to location,
-            "purpose" to purpose,
-            "note" to note,
+            "applicantName" to (applicantName.ifEmpty { "미설정" }),
+            "applicantDepartment" to (applicantDepartment.ifEmpty { "미설정" }),
+            "equipmentName" to (equipmentName.ifEmpty { "미설정" }),
+            "quantity" to quantity,
+            "location" to (location.ifEmpty { "미설정" }),
+            "purpose" to (purpose.ifEmpty { "미설정" }),
+            "note" to (note.ifEmpty { "없음" }),
             "requestDate" to requestDate,
             "status" to "대기중",
             "hasPhoto" to if (hasPhoto) "📸 있음" else "없음",
@@ -59,7 +60,7 @@ class GoogleSheetsHelper(private val context: Context) {
                 applicantName = applicantName,
                 department = applicantDepartment,
                 equipmentName = equipmentName,
-                quantity = "1",  // 수량을 처리하는 부분이 없으므로 기본값으로 설정
+                quantity = quantity,  // 수량
                 location = location,
                 purpose = purpose,
                 note = note,
@@ -67,16 +68,22 @@ class GoogleSheetsHelper(private val context: Context) {
                 photoUrls = photoUrls
             ).execute()
 
+            Log.d("Submit", "API Request - purpose: $purpose")
+
             if (response.isSuccessful) {
-                Log.i(TAG, "Google Sheets에 데이터 전송 성공")
+                Log.i("GoogleSheetsHelper", "Google Sheets에 데이터 전송 성공")
                 return@withContext true
             } else {
-                Log.e(TAG, "Google Sheets 전송 실패: ${response.code()}")
+                Log.e("GoogleSheetsHelper", "Google Sheets 전송 실패: ${response.code()} - ${response.message()}")
+                Log.e("GoogleSheetsHelper", "Response Body: ${response.body()}")
                 return@withContext false
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Google Sheets 전송 중 오류: ${e.message}", e)
+            Log.e("GoogleSheetsHelper", "Google Sheets 전송 중 오류: ${e.message}")
             return@withContext false
         }
     }
 }
+
+
+

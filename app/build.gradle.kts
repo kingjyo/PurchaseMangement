@@ -95,6 +95,23 @@ dependencies {
     implementation("com.google.firebase:firebase-auth-ktx")    // Google Sign In
     implementation ("com.google.android.gms:play-services-auth:21.2.0")
 
+
+    // Gmail API 관련 의존성 추가
+    implementation (libs.google.api.services.gmail)
+    implementation (libs.javax.mail)
+    implementation (libs.gms.play.services.auth)
+    implementation (libs.google.api.client)
+    implementation (libs.google.api.client.android)
+    implementation (libs.google.oauth.client)
+    implementation (libs.google.http.client)
+    implementation (libs.google.http.client.android)
+    implementation (libs.gson)
+    implementation (libs.jackson.core)
+    implementation (libs.client.google.api.services.gmail)
+    implementation (libs.guava)
+    implementation (libs.jsr305)
+    implementation (libs.protobuf.java)
+
     // 네이버 로그인 SDK
     implementation ("com.navercorp.nid:oauth:5.9.0")
 

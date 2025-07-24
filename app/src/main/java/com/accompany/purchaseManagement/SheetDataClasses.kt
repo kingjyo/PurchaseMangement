@@ -18,7 +18,7 @@ data class SheetRequest(
     @SerializedName("접수시간") val requestTime: String,
     @SerializedName("신청자명") val applicantName: String,
     @SerializedName("소속") val department: String,
-    @SerializedName("장비품목명") val equipmentName: String,
+    @SerializedName("장비/품목명") val equipmentName: String,
     @SerializedName("수량") val quantity: String,
     @SerializedName("장소") val location: String,
     @SerializedName("용도") val purpose: String,

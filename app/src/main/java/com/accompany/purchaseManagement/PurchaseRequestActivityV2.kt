@@ -1,11 +1,13 @@
 package com.accompany.purchaseManagement
 
+import QuantityFragment
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
@@ -15,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
@@ -28,6 +31,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class PurchaseRequestActivityV2 : AppCompatActivity() {
+
+    private lateinit var googleSheetsHelper: GoogleSheetsHelper
 
     companion object {
         private const val REQUEST_IMAGE_CAPTURE = 1
@@ -49,8 +54,6 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
     private var currentUser: UserInfo? = null
 
     // 입력 데이터
-    private var equipmentName = ""
-    private var quantity = "1"
     private var location = ""
     private var purpose = ""
     private var note = ""
@@ -82,10 +85,13 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_purchase_request_v2)
+        googleSheetsHelper = GoogleSheetsHelper(this)
 
         viewPager = findViewById(R.id.viewPager)
+        tabLayout = findViewById(R.id.tabLayout)
         btnPrevious = findViewById(R.id.btnPrevious)
         btnNext = findViewById(R.id.btnNext)
+        progressBar = findViewById(R.id.progressBar)
 
         // 슬라이드로 페이지 전환 비활성화
         viewPager.isUserInputEnabled = false
@@ -128,7 +134,7 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
                 if (viewPager.currentItem < 5) { // 총 6페이지
                     viewPager.currentItem = viewPager.currentItem + 1
                 } else {
-                    submitPurchaseRequest()  // 최종 제출
+                    showSubmitConfirmDialog()  // 최종 제출 확인  // 최종 제출
                 }
             }
         }
@@ -171,17 +177,14 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
         }
     }
 
+    // 데이터 유효성 검사
     private fun validateCurrentPage(): Boolean {
         return when (viewPager.currentItem) {
             0 -> { // 장비명
-                val fragment = supportFragmentManager.findFragmentByTag("f0") as? EquipmentNameFragment
-                fragment?.isEquipmentNameValid() ?: false
+                viewModel.equipmentName.value?.let { it.isNotEmpty() && it.length >= 2 } ?: false
             }
             1 -> { // 수량
-                if (!viewModel.isQuantityValid()) {
-                    Toast.makeText(this, "올바른 수량을 입력해주세요", Toast.LENGTH_SHORT).show()
-                    false
-                } else true
+                viewModel.quantity.value?.isNotEmpty() ?: false
             }
             2 -> true  // 장소 (선택사항)
             3 -> { // 용도
@@ -195,68 +198,129 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
     }
 
 
-
-
-
     // 구매신청 제출
     private fun submitPurchaseRequest() {
-        if (currentUser == null) {
-            Toast.makeText(this, "로그인 정보를 확인할 수 없습니다", Toast.LENGTH_SHORT).show()
-            return
+        val purposeFragment = supportFragmentManager.findFragmentByTag("f3") as? PurposeFragment
+        purpose = purposeFragment?.getPurpose() ?: ""
+
+        val quantity = viewModel.quantity.value ?: "1"
+
+        val equipmentName = viewModel.equipmentName.value ?: ""  // Use ViewModel, local val
+
+        // NoteFragment와 LocationFragment 추가
+        val noteFragment = supportFragmentManager.findFragmentByTag("f4") as? NoteFragment
+        note = noteFragment?.getNote() ?: ""
+
+        val locationFragment = supportFragmentManager.findFragmentByTag("f2") as? LocationFragment
+        location = locationFragment?.getLocation() ?: ""
+
+
+        // 입력된 값들이 비어있지 않으면 제출
+        if (purpose.isNotEmpty() && quantity.isNotEmpty() && equipmentName.isNotEmpty() && location.isNotEmpty()) {
+            lifecycleScope.launch {
+                try {
+                    // Google Sheets와 Firebase에 데이터 전송
+                    val result = googleSheetsHelper.submitToGoogleSheets(
+                        applicantName = "홍길동",
+                        applicantDepartment = "농업부서",
+                        equipmentName = equipmentName,
+                        quantity = quantity,
+                        location = location,
+                        purpose = purpose,
+                        note = note,
+                        requestDate = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.KOREA).format(Date()),
+                        hasPhoto = photoUris.isNotEmpty(),
+                        photoUrls = photoUris.joinToString(",")
+                    )
+
+                    // 결과 처리
+                    if (result) {
+                        Toast.makeText(applicationContext, "구매신청이 완료되었습니다.", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(applicationContext, "구매신청 실패", Toast.LENGTH_SHORT).show()
+                    }
+
+                } catch (e: Exception) {
+                    // 예외 발생 시 로그와 Toast로 오류 메시지 출력
+                    Log.e("PurchaseRequestActivityV2", "Submission error: ${e.message}", e)
+                    Toast.makeText(applicationContext, "제출 중 오류 발생: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
+        } else {
+            Toast.makeText(applicationContext, "모든 필드를 입력해주세요.", Toast.LENGTH_SHORT).show()
         }
-        showSubmitConfirmDialog()
     }
 
+
+    // 최종 제출 확인 다이얼로그
     private fun showSubmitConfirmDialog() {
+        // 각 Fragment에서 데이터를 가져오기 전에 Fragment가 완전히 초기화되었는지 확인
+        val equipmentName = viewModel.equipmentName.value ?: ""
+        val quantity = viewModel.quantity.value ?: "1"
+        val purposeFragment = supportFragmentManager.findFragmentByTag("f3") as? PurposeFragment
+        val locationFragment = supportFragmentManager.findFragmentByTag("f2") as? LocationFragment
+        val noteFragment = supportFragmentManager.findFragmentByTag("f4") as? NoteFragment
+
+        // 로그: 각 Fragment에서 데이터가 제대로 초기화되었는지 확인
+        Log.d("PurchaseRequestActivityV2", "purposeFragment: $purposeFragment")
+        Log.d("PurchaseRequestActivityV2", "locationFragment: $locationFragment")
+        Log.d("PurchaseRequestActivityV2", "noteFragment: $noteFragment")
+
+        // 데이터 가져오기
+
+        val location = locationFragment?.getLocation() ?: ""
+        val purpose = purposeFragment?.getPurpose() ?: ""
+        val note = noteFragment?.getNote() ?: ""
+
+        // 로그인한 사용자 정보 가져오기
+        val applicantName = currentUser?.name ?: "미설정"
+        val applicantDepartment = currentUser?.department ?: "미설정"
+        val applicantEmail = currentUser?.email ?: ""
+
         val message = """
         📋 구매신청 내용 확인
-        👤 신청자: ${currentUser?.name} (${currentUser?.department})
-        🔧 장비명: $equipmentName
+        👤 신청자: $applicantName ($applicantDepartment)
+        🔧 장비/품목명: $equipmentName
         🔢 수량: $quantity
         ${if (location.isNotEmpty()) "📍 장소: $location\n" else ""}
         📝 용도: $purpose
         ${if (note.isNotEmpty()) "💬 기타: $note\n" else ""}
         📸 사진: ${photoUris.size}장
-
-        위 내용으로 구매신청을 제출하시겠습니까?
     """.trimIndent()
 
         AlertDialog.Builder(this)
             .setTitle("구매신청 확인")
             .setMessage(message)
-            .setPositiveButton("제출") { _, _ -> performSubmit() }
+            .setPositiveButton("제출") { _, _ -> submitPurchaseRequest() }
             .setNegativeButton("취소", null)
             .show()
     }
 
+
     private fun performSubmit() {
         btnNext.isEnabled = false
         progressBar.visibility = View.VISIBLE
+
         val applicantName = currentUser?.name ?: "미설정"
         val applicantDepartment = currentUser?.department ?: "미설정"
+        val quantity = viewModel.quantity.value ?: "1"
         val applicantEmail = currentUser?.email ?: ""
         val requestDate = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.KOREA).format(Date())
 
-        // 데이터 가져오기 (ViewModel 또는 각 Fragment에서 값 가져오기)
-        equipmentName = viewModel.equipmentName.value ?: ""
-        quantity = viewModel.quantity.value ?: "1"
-        location = viewModel.location.value ?: ""
-        purpose = viewModel.purpose.value ?: ""
-        note = viewModel.note.value ?: ""
-
-        // 사진 업로드
-        val hasPhoto = photoUris.isNotEmpty()
-
         lifecycleScope.launch {
             try {
-                // 사진 업로드 처리 (비동기로 기다림)
+                // 사진 업로드 여부 체크
+                val hasPhoto = photoUris.isNotEmpty()
+
+                // 사진 업로드 (suspend 함수)
                 val photoUrls = if (hasPhoto) {
-                    uploadPhotos(photoUris) // uploadPhotos가 suspend 함수로 정의되어 있어야 함
+                    uploadPhotos(photoUris)
                 } else {
                     emptyList<String>()
                 }
 
                 // Firestore에 저장
+                val equipmentName = viewModel.equipmentName.value ?: ""
                 val requestData = hashMapOf(
                     "applicantName" to applicantName,
                     "applicantDepartment" to applicantDepartment,
@@ -274,7 +338,7 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
 
                 val docRef = db.collection("purchaseRequests")
                     .add(requestData)
-                    .await()
+                    .await() // 비동기 대기
 
                 val requestId = docRef.id
 
@@ -282,11 +346,10 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
                 dbHelper.insertPurchaseRequest(applicantName, applicantDepartment, equipmentName, location, purpose, note, requestDate, PurchaseStatus.PENDING.displayName)
 
                 // Google Sheets 저장
-                val googleSheetsHelper = GoogleSheetsHelper(this@PurchaseRequestActivityV2)
-                val sheetsSuccess = googleSheetsHelper.submitToGoogleSheets(
-                    applicantName, applicantDepartment, equipmentName, location, purpose, note, requestDate,
+                googleSheetsHelper.submitToGoogleSheets(
+                    applicantName, applicantDepartment, equipmentName, quantity, location, purpose, note, requestDate,
                     hasPhoto = hasPhoto,
-                    photoUrls = photoUrls.joinToString(",") // 사진 URL들을 콤마로 구분
+                    photoUrls = photoUrls.joinToString(",")
                 )
 
                 // 이메일 전송
@@ -299,8 +362,11 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
                 showSuccessDialog()
 
             } catch (e: Exception) {
+                // 예외 발생 시 로그와 Toast로 오류 메시지 출력
+                Log.e("PurchaseRequestActivityV2", "Submission error: ${e.message}", e)
                 Toast.makeText(this@PurchaseRequestActivityV2, "제출 중 오류가 발생했습니다: ${e.message}", Toast.LENGTH_LONG).show()
             } finally {
+                // 제출이 끝난 후 버튼 활성화 및 프로그레스 바 숨김 처리
                 btnNext.isEnabled = true
                 progressBar.visibility = View.GONE
             }
@@ -323,10 +389,13 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
     private fun showSuccessDialog() {
         AlertDialog.Builder(this)
             .setTitle("✅ 구매신청 완료")
-            .setMessage("""구매신청이 성공적으로 제출되었습니다!""")
+            .setMessage("구매신청이 성공적으로 제출되었습니다!")
             .setPositiveButton("확인") { _, _ ->
-                setResult(Activity.RESULT_OK)
-                finish()
+                // 먼저 MainActivity로 이동
+                val intent = Intent(this, MainActivity::class.java)
+                startActivity(intent)  // MainActivity로 이동
+                // 그 후 현재 Activity 종료
+                finish()  // 현재 Activity 종료
             }
             .setCancelable(false)
             .show()

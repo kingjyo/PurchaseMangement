@@ -5,9 +5,11 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 
-class PurchaseRequestPagerAdapter(activity: FragmentActivity) : FragmentStateAdapter(activity) {
+class PurchaseRequestPagerAdapter(
+    private val activity: FragmentActivity
+) : FragmentStateAdapter(activity) {
 
-    // Fragment 캐시
+    // Fragment 인스턴스를 캐시로 저장
     private val fragmentCache = mutableMapOf<Int, Fragment>()
 
     override fun getItemCount(): Int = 6
@@ -22,11 +24,13 @@ class PurchaseRequestPagerAdapter(activity: FragmentActivity) : FragmentStateAda
                 3 -> PurposeFragment()
                 4 -> NoteFragment()
                 5 -> PhotoFragment()
-                else -> EquipmentNameFragment()
+                else -> Fragment()
             }
         }
     }
 
-    // Fragment를 가져오는 메서드 추가
-    fun getFragment(position: Int): Fragment? = fragmentCache[position]
+    // Fragment 가져오기 메서드 추가
+    fun getFragment(position: Int): Fragment? {
+        return fragmentCache[position]
+    }
 }

@@ -41,6 +41,17 @@
                 android:layout_marginBottom="24dp"
                 android:gravity="center"/>
 
+            <!-- 유효성 검사 도움말 (tvHelp 추가) -->
+            <TextView
+                android:id="@+id/tvHelp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textColor="@android:color/darker_gray"
+                android:textSize="14sp"
+                android:gravity="center"
+                android:layout_marginTop="8dp"/>
+
         </LinearLayout>
     </ScrollView>
 

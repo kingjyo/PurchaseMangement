@@ -35,10 +35,11 @@
         android:layout_height="wrap_content" />
 
     <!-- Submit Button (Optional) -->
-    <FloatingActionButton
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabSubmit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_submit" />
+        android:src="@drawable/ic_submit"
+        android:contentDescription="Submit Purchase Request" />
 
 </LinearLayout>
