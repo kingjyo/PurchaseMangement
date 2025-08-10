@@ -12,7 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.common.SignInButton
 import kotlinx.coroutines.launch
 
-class LoginActivityV2 : AppCompatActivity() {
+class LoginActivity2 : AppCompatActivity() {
 
     private lateinit var btnGoogleSignIn: SignInButton
     private lateinit var btnNaverSignIn: Button
