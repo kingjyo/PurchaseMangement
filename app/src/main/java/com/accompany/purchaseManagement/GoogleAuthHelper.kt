@@ -198,7 +198,7 @@ class GoogleAuthHelper(private val activity: Activity) {
         db.collection("users").document(email)
             .update(updates)
             .addOnSuccessListener {
-                saveUserToPreferences(email, name, department, getCurrentUser()?.isAdmin ?: false)
+                saveUserToPreferences(email, name, department, getCurrentUser()?.isAdmin() ?: false)
                 Log.d("GoogleAuthHelper", "사용자 정보 업데이트 성공: $email")
                 onComplete(true)
             }

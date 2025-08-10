@@ -232,8 +232,8 @@ class NetworkManager private constructor(private val context: Context) {
     /**
      * Retrofit 서비스 인스턴스 생성
      */
-    inline fun <reified T> createService(): T {
-        return retrofit.create(T::class.java)
+    fun <T> createService(clazz: Class<T>): T {
+        return retrofit.create(clazz)
     }
     
     fun unregisterNetworkCallback() {

@@ -212,10 +212,10 @@ class MainActivity : AppCompatActivity() {
                 showLogoutDialog()
                 true
             }
-            R.id.action_refresh -> {
-                refreshData()
-                true
-            }
+            // R.id.action_refresh -> {
+            //     refreshData()
+            //     true
+            // }
             else -> super.onOptionsItemSelected(item)
         }
     }

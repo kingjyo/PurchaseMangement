@@ -15,6 +15,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import com.accompany.purchaseManagement.data.models.User
 
 class PurchaseStatusActivityV2 : AppCompatActivity() {
 
@@ -29,7 +30,7 @@ class PurchaseStatusActivityV2 : AppCompatActivity() {
     private lateinit var googleAuthHelper: GoogleAuthHelper
     private lateinit var fcmHelper: FcmNotificationHelper
 
-    private var currentUser: UserInfo? = null
+    private var currentUser: User? = null
     private var selectedStatus: String = "전체"
     private val requestList = mutableListOf<PurchaseRequestV2>()
 
@@ -57,7 +58,7 @@ class PurchaseStatusActivityV2 : AppCompatActivity() {
         fabRefresh = findViewById(R.id.fabRefresh)
 
         // 관리자만 새로고침 버튼 표시
-        fabRefresh.visibility = if (currentUser?.isAdmin == true) View.VISIBLE else View.GONE
+        fabRefresh.visibility = if (currentUser?.isAdmin() == true) View.VISIBLE else View.GONE
         fabRefresh.setOnClickListener {
             loadRequests()
         }
@@ -85,7 +86,7 @@ class PurchaseStatusActivityV2 : AppCompatActivity() {
             requests = requestList,
             currentUser = currentUser,
             onItemClick = { request ->
-                if (currentUser?.isAdmin == true) {
+                if (currentUser?.isAdmin() == true) {
                     showStatusChangeDialog(request)
                 } else if (request.applicantEmail == currentUser?.email && request.isModifiable()) {
                     showModifyDialog(request)

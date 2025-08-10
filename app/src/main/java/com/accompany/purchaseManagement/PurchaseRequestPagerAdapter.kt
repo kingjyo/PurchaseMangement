@@ -3,12 +3,7 @@ package com.accompany.purchaseManagement
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.accompany.purchaseManagement.fragments.EquipmentNameFragment
-import com.accompany.purchaseManagement.fragments.LocationFragment
-import com.accompany.purchaseManagement.fragments.NoteFragment
-import com.accompany.purchaseManagement.fragments.PhotoFragment
-import com.accompany.purchaseManagement.fragments.PurposeFragment
-import com.accompany.purchaseManagement.fragments.QuantityFragment
+import com.accompany.purchaseManagement.fragments.*
 
 class PurchaseRequestPagerAdapter(
     private val activity: FragmentActivity

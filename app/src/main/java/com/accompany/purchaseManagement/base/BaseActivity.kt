@@ -6,7 +6,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.accompany.purchaseManagement.BuildConfig
+// import com.accompany.purchaseManagement.BuildConfig
 import com.accompany.purchaseManagement.PurchaseManagementApp
 import com.accompany.purchaseManagement.utils.MemoryManager
 import com.accompany.purchaseManagement.utils.PermissionManager
@@ -44,9 +44,9 @@ abstract class BaseActivity : AppCompatActivity() {
         super.onResume()
         
         // 메모리 사용량 로깅 (디버그 모드에서만)
-        if (BuildConfig.DEBUG) {
+        // if (BuildConfig.DEBUG) {
             memoryManager.logMemoryUsage(this, this::class.simpleName ?: TAG)
-        }
+        // }
     }
     
     override fun onDestroy() {

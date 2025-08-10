@@ -1,6 +1,7 @@
 package com.accompany.purchaseManagement
 
-import com.accompany.purchaseManagement.fragments.QuantityFragment
+import com.accompany.purchaseManagement.fragments.*
+import com.accompany.purchaseManagement.data.models.User
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -51,7 +52,7 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
 
     // 사용자 정보
     private lateinit var googleAuthHelper: GoogleAuthHelper
-    private var currentUser: UserInfo? = null
+    private var currentUser: User? = null
 
     // 입력 데이터
     private var location = ""
@@ -80,7 +81,7 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
     private val storage = FirebaseStorage.getInstance()
     private lateinit var dbHelper: PurchaseRequestDbHelper
     private lateinit var fcmHelper: FcmNotificationHelper
-    private lateinit var emailHelper: EmailHelper
+    // private lateinit var emailHelper: EmailHelper // 대기 중
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -109,7 +110,7 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
         currentUser = googleAuthHelper.getCurrentUser()
         dbHelper = PurchaseRequestDbHelper(this)
         fcmHelper = FcmNotificationHelper(this)
-        emailHelper = EmailHelper(this)
+        // emailHelper = EmailHelper(this) // 대기 중
 
         initViews()
         setupViewPager()
@@ -352,8 +353,8 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
                     photoUrls = photoUrls.joinToString(",")
                 )
 
-                // 이메일 전송
-                emailHelper.sendPurchaseRequestEmail(applicantName, applicantDepartment, equipmentName, quantity, location, purpose, note, requestDate, photoUrls)
+                // 이메일 전송 (대기 중)
+                // emailHelper.sendPurchaseRequestEmail(applicantName, applicantDepartment, equipmentName, quantity, location, purpose, note, requestDate, photoUrls)
 
                 // 관리자에게 FCM 알림
                 fcmHelper.notifyAdminNewRequest(applicantName, equipmentName, requestId)

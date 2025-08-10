@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.common.SignInButton
 import kotlinx.coroutines.launch
+import com.accompany.purchaseManagement.data.models.User
 
 class LoginActivity2 : AppCompatActivity() {
 
@@ -103,19 +104,19 @@ class LoginActivity2 : AppCompatActivity() {
                     fcmHelper.updateFcmToken(email)
 
                     // 알림 권한 요청
-                    fcmHelper.requestNotificationPermission(this@LoginActivityV2)
+                    fcmHelper.requestNotificationPermission(this@LoginActivity2)
 
                     // 사용자 정보를 SharedPreferences에 저장
-                    val info = UserInfo(
+                    val info = User(
                         email = email,
                         name = userInfo.name,
                         department = "미설정",
-                        isAdmin = false
+                        role = User.ROLE_USER
                     )
                     saveUserInfo(info)
 
                     Toast.makeText(
-                        this@LoginActivityV2,
+                        this@LoginActivity2,
                         "${userInfo.name}님 환영합니다!",
                         Toast.LENGTH_SHORT
                     ).show()
@@ -132,13 +133,13 @@ class LoginActivity2 : AppCompatActivity() {
         )
     }
 
-    private fun saveUserInfo(info: UserInfo) {
+    private fun saveUserInfo(info: User) {
         val prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE)
         prefs.edit().apply {
             putString("userEmail", info.email)
             putString("userName", info.name)
             putString("userDepartment", info.department)
-            putBoolean("isAdmin", info.isAdmin)
+            putBoolean("isAdmin", info.isAdmin())
             putBoolean("isLoggedIn", true)
             apply()
         }
@@ -157,19 +158,19 @@ class LoginActivity2 : AppCompatActivity() {
                             fcmHelper.updateFcmToken(email)
                         }
 
-                        fcmHelper.requestNotificationPermission(this@LoginActivityV2)
+                        fcmHelper.requestNotificationPermission(this@LoginActivity2)
 
                         // **[여기 추가!]**
-                        val info = UserInfo(
+                        val info = User(
                             email = account.email ?: "",
                             name = account.displayName ?: "미설정",
                             department = "미설정",
-                            isAdmin = false
+                            role = User.ROLE_USER
                         )
                         saveUserInfo(info)
 
                         Toast.makeText(
-                            this@LoginActivityV2,
+                            this@LoginActivity2,
                             "${account.displayName}님 환영합니다!",
                             Toast.LENGTH_SHORT
                         ).show()

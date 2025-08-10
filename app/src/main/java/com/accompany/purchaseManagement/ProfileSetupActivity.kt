@@ -42,7 +42,7 @@ class ProfileSetupActivity : AppCompatActivity() {
             if (currentUser == null) {
                 Toast.makeText(this, "로그인 정보가 없습니다. 다시 로그인해주세요.", Toast.LENGTH_SHORT).show()
                 Log.d("ProfileSetup", "currentUser == null")           // ④ 예외 처리
-                startActivity(Intent(this, LoginActivityV2::class.java))
+                startActivity(Intent(this, LoginActivity2::class.java))
                 finish()
                 return@setOnClickListener
             }

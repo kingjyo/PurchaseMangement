@@ -8,12 +8,12 @@ import android.widget.*
 import com.google.android.material.chip.Chip
 import java.text.SimpleDateFormat
 import java.util.*
-import com.accompany.purchaseManagement.UserInfo
+import com.accompany.purchaseManagement.data.models.User
 
 class PurchaseRequestListAdapter(
     private val context: Context,
     private val requests: MutableList<PurchaseRequestV2>,
-    private val currentUser: UserInfo?,
+    private val currentUser: User?,
     private val onItemClick: ((PurchaseRequestV2) -> Unit)? = null,
     private val onEditClick: ((PurchaseRequestV2) -> Unit)? = null
 ) : BaseAdapter() {

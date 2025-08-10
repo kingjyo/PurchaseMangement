@@ -18,8 +18,8 @@ class PhotoAdapter(
 ) : RecyclerView.Adapter<PhotoAdapter.PhotoViewHolder>() {
     
     class PhotoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val imageView: ImageView = itemView.findViewById(R.id.imageView)
-        val removeButton: View = itemView.findViewById(R.id.btnRemove)
+        val imageView: ImageView = itemView.findViewById(R.id.ivPhoto)
+        val btnRemove: View = itemView.findViewById(R.id.btnRemove)
     }
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PhotoViewHolder {
@@ -30,7 +30,7 @@ class PhotoAdapter(
     
     override fun onBindViewHolder(holder: PhotoViewHolder, position: Int) {
         // 간단한 구현 - 실제로는 이미지 로딩 라이브러리 사용
-        holder.removeButton.setOnClickListener {
+        holder.btnRemove.setOnClickListener {
             onRemove(position)
         }
     }
