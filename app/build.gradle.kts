@@ -76,41 +76,30 @@ dependencies {
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     implementation ("com.squareup.okhttp3:okhttp:4.9.3")
-    implementation(platform(libs.firebase.bom)) // 딱 한 줄, 버전 없는 플랫폼!
-    implementation(libs.firebase.storage.ktx)   // 버전 X
-    implementation ("com.google.firebase:firebase-messaging:24.1.1")
-    implementation ("com.google.firebase:firebase-firestore:24.10.3")
-    implementation ("com.google.firebase:firebase-auth:23.1.0")
+    // Firebase BOM - 버전 관리 통합
+    implementation(platform("com.google.firebase:firebase-bom:33.15.0"))
 
     // Navigation
     implementation("androidx.navigation:navigation-fragment-ktx:2.7.6")
     implementation("androidx.navigation:navigation-ui-ktx:2.7.6")
 
-// [Firebase BOM 방식 권장]
-    implementation(platform("com.google.firebase:firebase-bom:32.8.0"))
+    // Firebase 서비스들 (BOM으로 버전 관리)
     implementation("com.google.firebase:firebase-storage-ktx")
     implementation("com.google.firebase:firebase-analytics-ktx")
     implementation("com.google.firebase:firebase-messaging-ktx")
     implementation("com.google.firebase:firebase-firestore-ktx")
-    implementation("com.google.firebase:firebase-auth-ktx")    // Google Sign In
-    implementation ("com.google.android.gms:play-services-auth:21.2.0")
+    implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
 
 
-    // Gmail API 관련 의존성 추가
-    implementation (libs.google.api.services.gmail)
-    implementation (libs.javax.mail)
-    implementation (libs.gms.play.services.auth)
-    implementation (libs.google.api.client)
-    implementation (libs.google.api.client.android)
-    implementation (libs.google.oauth.client)
-    implementation (libs.google.http.client)
-    implementation (libs.google.http.client.android)
-    implementation (libs.gson)
-    implementation (libs.jackson.core)
-    implementation (libs.client.google.api.services.gmail)
-    implementation (libs.guava)
-    implementation (libs.jsr305)
-    implementation (libs.protobuf.java)
+    // Gmail API 관련 의존성 (일시적으로 주석 처리 - 컴파일 테스트용)
+    // implementation("com.google.apis:google-api-services-gmail:v1-rev20240829-2.0.0")
+    // implementation("com.google.api-client:google-api-client:2.2.0")
+    // implementation("com.google.api-client:google-api-client-android:2.2.0")
+    // implementation("com.google.oauth-client:google-oauth-client-jetty:1.34.1")
+    // implementation("com.google.http-client:google-http-client-gson:1.43.3")
+    implementation(libs.gms.play.services.auth)
+    implementation(libs.gson)
 
     // 네이버 로그인 SDK
     implementation ("com.navercorp.nid:oauth:5.9.0")

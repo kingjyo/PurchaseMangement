@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.accompany.purchaseManagement">
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- 인터넷 권한 (Google Sheets 연동용) -->
+    <!-- 네트워크 권한 -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32" />
-
+    
     <!-- 카메라 권한 -->
     <uses-permission android:name="android.permission.CAMERA" />
-
-    <!-- 외부 저장소 권한 -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="32" />
+    
+    <!-- 음성 녹음 권한 (음성 입력용) -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    
+    <!-- 저장소 권한 (Android 12 이하) -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
-
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    
     <!-- Android 13+ 미디어 권한 -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
-    <uses-permission android:name="android.permission.INTERNET"/>
+    
+    <!-- FCM 알림 권한 (Android 13+) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <!-- 카메라 하드웨어 (선택사항) -->
     <uses-feature
@@ -30,7 +30,7 @@
         android:required="false" />
 
     <application
-        android:name=".config.FirebaseConfig"
+        android:name=".PurchaseManagementApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -51,10 +51,6 @@
             android:name="com.naver.login.REDIRECT_URI"
             android:value="naverlogin://com.accompany.purchaseManagement" /> <!-- 네이버 로그인 후 리다이렉트되는 URI -->
 
-        <!-- 네이버 로그인 버튼을 위한 설정 -->
-        <meta-data
-            android:name="com.naver.login.구매신청"
-            android:value="구매신청" />
 
         <!-- 메인 액티비티 -->
         <activity
@@ -70,7 +66,7 @@
         </activity>
 
         <activity
-            android:name=".LoginActivityV2"
+            android:name=".LoginActivity2"
             android:exported="true"
             android:windowSoftInputMode="adjustResize" />
 
@@ -116,6 +112,42 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
+        </activity>
+        
+        <!-- 가축 현황 액티비티 -->
+        <activity
+            android:name=".CattleStatusActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:label="가축 현황"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
+        
+        <!-- 사용자 관리 액티비티 -->
+        <activity
+            android:name=".UserManagementActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:label="사용자 관리"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
+        
+        <!-- 구매신청 수정 액티비티 -->
+        <activity
+            android:name=".EditPurchaseRequestActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:label="구매신청 수정"
+            android:parentActivityName=".PurchaseStatusActivityV2">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".PurchaseStatusActivityV2" />
         </activity>
 
         <!-- 파일 제공자 (이미지 및 엑셀 파일 공유용) -->

@@ -1,6 +1,6 @@
 package com.accompany.purchaseManagement
 
-import QuantityFragment
+import com.accompany.purchaseManagement.fragments.QuantityFragment
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager

@@ -13,7 +13,7 @@ import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
-import com.accompany.purchaseManagement.UserInfo
+import com.accompany.purchaseManagement.data.models.User
 
 class GoogleAuthHelper(private val activity: Activity) {
 
@@ -155,15 +155,15 @@ class GoogleAuthHelper(private val activity: Activity) {
     }
 
     // 현재 로그인된 사용자 정보 가져오기
-    fun getCurrentUser(): UserInfo? {
+    fun getCurrentUser(): User? {
         val prefs = activity.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
         val email = prefs.getString(KEY_USER_EMAIL, null) ?: return null
 
-        return UserInfo(
+        return User(
             email = email,
             name = prefs.getString(KEY_USER_NAME, "미설정") ?: "미설정",
             department = prefs.getString(KEY_USER_DEPARTMENT, "미설정") ?: "미설정",
-            isAdmin = prefs.getBoolean(KEY_IS_ADMIN, false)
+            role = if (prefs.getBoolean(KEY_IS_ADMIN, false)) User.ROLE_ADMIN else User.ROLE_USER
         )
     }
 

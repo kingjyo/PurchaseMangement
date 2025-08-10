@@ -1,6 +1,6 @@
 package com.accompany.purchaseManagement
 
-import com.accompany.purchaseManagement.Livestock
+import com.accompany.purchaseManagement.data.models.Livestock
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 
