@@ -4,6 +4,13 @@
 
 This is a purchase management app for my office. Previously, they ordered parts by voice, not text, which was difficult. I made this app for easy use, especially for older users who need a simple interface.
 
+---
+
+**📖 빠른 시작 (Quick Start):** [한국어 빠른 시작 가이드](QUICKSTART_KR.md)  
+**🔧 문제 해결 (Troubleshooting):** [한국어 문제 해결 가이드](TROUBLESHOOTING_KR.md)
+
+---
+
 ## Project Structure
 
 This is an Android application built with:
