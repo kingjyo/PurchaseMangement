@@ -81,7 +81,7 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
     private val storage = FirebaseStorage.getInstance()
     private lateinit var dbHelper: PurchaseRequestDbHelper
     private lateinit var fcmHelper: FcmNotificationHelper
-    // private lateinit var emailHelper: EmailHelper // 대기 중
+    private lateinit var gmailHelper: GmailHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -110,7 +110,7 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
         currentUser = googleAuthHelper.getCurrentUser()
         dbHelper = PurchaseRequestDbHelper(this)
         fcmHelper = FcmNotificationHelper(this)
-        // emailHelper = EmailHelper(this) // 대기 중
+        gmailHelper = GmailHelper(this)
 
         initViews()
         setupViewPager()
@@ -306,6 +306,7 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
         val applicantDepartment = currentUser?.department ?: "미설정"
         val quantity = viewModel.quantity.value ?: "1"
         val applicantEmail = currentUser?.email ?: ""
+        val applicantId = currentUser?.id ?: ""
         val requestDate = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.KOREA).format(Date())
 
         lifecycleScope.launch {
@@ -323,6 +324,7 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
                 // Firestore에 저장
                 val equipmentName = viewModel.equipmentName.value ?: ""
                 val requestData = hashMapOf(
+                    "applicantId" to applicantId,
                     "applicantName" to applicantName,
                     "applicantDepartment" to applicantDepartment,
                     "applicantEmail" to applicantEmail,
@@ -353,8 +355,21 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
                     photoUrls = photoUrls.joinToString(",")
                 )
 
-                // 이메일 전송 (대기 중)
-                // emailHelper.sendPurchaseRequestEmail(applicantName, applicantDepartment, equipmentName, quantity, location, purpose, note, requestDate, photoUrls)
+                // Gmail로 이메일 전송
+                sendGmailNotification(
+                    requestId = requestId,
+                    applicantId = applicantId,
+                    applicantName = applicantName,
+                    applicantDepartment = applicantDepartment,
+                    applicantEmail = applicantEmail,
+                    equipmentName = equipmentName,
+                    quantity = quantity,
+                    location = location,
+                    purpose = purpose,
+                    note = note,
+                    photoUrls = photoUrls,
+                    requestDate = requestDate
+                )
 
                 // 관리자에게 FCM 알림
                 fcmHelper.notifyAdminNewRequest(applicantName, equipmentName, requestId)
@@ -371,6 +386,59 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
                 btnNext.isEnabled = true
                 progressBar.visibility = View.GONE
             }
+        }
+    }
+
+    /**
+     * Gmail을 통해 관리자에게 구매신청 알림 이메일 전송
+     */
+    private suspend fun sendGmailNotification(
+        requestId: String,
+        applicantId: String,
+        applicantName: String,
+        applicantDepartment: String,
+        applicantEmail: String,
+        equipmentName: String,
+        quantity: String,
+        location: String,
+        purpose: String,
+        note: String,
+        photoUrls: List<String>,
+        requestDate: String
+    ) {
+        try {
+            // PurchaseRequest 객체 생성
+            val purchaseRequest = com.accompany.purchaseManagement.data.models.PurchaseRequest(
+                id = requestId,
+                applicantId = applicantId,
+                applicantName = applicantName,
+                applicantDepartment = applicantDepartment,
+                applicantEmail = applicantEmail,
+                equipmentName = equipmentName,
+                quantity = quantity,
+                location = location,
+                purpose = purpose,
+                note = note,
+                photoUrls = photoUrls,
+                requestDate = requestDate,
+                status = com.accompany.purchaseManagement.data.models.PurchaseRequest.STATUS_PENDING
+            )
+            
+            // Gmail 이메일 전송
+            val result = gmailHelper.sendPurchaseRequestEmail(
+                request = purchaseRequest,
+                adminEmail = AppConfig.MANAGER_EMAIL
+            )
+            
+            if (result.isSuccess) {
+                Log.d("PurchaseRequestActivityV2", "Gmail notification sent successfully to ${AppConfig.MANAGER_EMAIL}")
+            } else {
+                Log.w("PurchaseRequestActivityV2", "Failed to send Gmail notification: ${result.exceptionOrNull()?.message}")
+                // Gmail 전송 실패는 전체 프로세스를 중단하지 않음 (FCM이 백업 역할)
+            }
+        } catch (e: Exception) {
+            Log.e("PurchaseRequestActivityV2", "Error sending Gmail notification", e)
+            // 이메일 전송 실패는 치명적이지 않으므로 계속 진행
         }
     }
 

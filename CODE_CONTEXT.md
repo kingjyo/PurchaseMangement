@@ -219,6 +219,37 @@ class MyActivity : BaseActivity() {
 
 ### 4. 유틸리티 클래스
 
+#### `GmailHelper.kt` - Gmail 알림 전송 (NEW!)
+Gmail API를 통한 이메일 알림 시스템
+
+**핵심 기능:**
+- 구매신청 시 관리자에게 자동 이메일 발송
+- HTML 형식의 보기 좋은 이메일
+- 신청자 정보, 구매 정보, 첨부 사진 포함
+- Google OAuth 인증 사용
+
+**주요 메서드:**
+```kotlin
+// Gmail 서비스 초기화
+fun initializeGmailService(account: GoogleSignInAccount): Boolean
+fun initializeWithCurrentAccount(): Boolean
+
+// 구매신청 이메일 전송
+suspend fun sendPurchaseRequestEmail(
+    request: PurchaseRequest,
+    adminEmail: String = AppConfig.MANAGER_EMAIL
+): Result<Unit>
+
+// 테스트 이메일 전송
+suspend fun sendTestEmail(to: String): Result<Unit>
+```
+
+**이메일 내용:**
+- 📧 제목: "알림: 구매신청 도착"
+- 👤 신청자 정보 (이름, 소속, 이메일)
+- 🛒 구매 정보 (품목명, 수량, 장소, 용도 등)
+- 📷 첨부 사진 (최대 3장 직접 표시)
+
 #### `utils/FirestoreHelper.kt` - Firebase 데이터베이스
 모든 Firestore CRUD 작업 관리
 
@@ -534,10 +565,42 @@ fun clearUserSession() {
    }
    ```
 
-5. **저장**
+5. **저장 및 알림**
    - Firestore에 저장
    - Google Sheets에 동시 저장 (백업)
-   - 관리자에게 FCM 알림 발송
+   - **Gmail로 관리자에게 상세 알림 이메일 전송** ← NEW!
+   - FCM 푸시 알림 발송
+
+#### Gmail 이메일 알림 (NEW!)
+구매신청 제출 시 관리자에게 자동으로 상세 알림 이메일 전송
+
+**전송 프로세스:**
+```kotlin
+// PurchaseRequestActivityV2.kt
+private suspend fun sendGmailNotification(...) {
+    // PurchaseRequest 객체 생성
+    val purchaseRequest = PurchaseRequest(...)
+    
+    // Gmail 이메일 전송
+    val result = gmailHelper.sendPurchaseRequestEmail(
+        request = purchaseRequest,
+        adminEmail = AppConfig.MANAGER_EMAIL
+    )
+}
+```
+
+**이메일 특징:**
+- ✉️ HTML 형식의 깔끔한 디자인
+- 📋 신청자 정보 (이름, 소속, 이메일)
+- 🛒 구매 정보 (품목명, 수량, 장소, 용도, 기타사항)
+- 📷 첨부 사진 (최대 3장 직접 표시, 나머지 개수 안내)
+- 🎨 상태별 색상 배지 (대기중, 승인됨 등)
+- 📱 앱 확인 안내 메시지
+
+**설정:**
+- `AppConfig.MANAGER_EMAIL`에 관리자 이메일 설정
+- Google OAuth 로그인 시 Gmail.SEND 권한 자동 요청
+- 자세한 설정: `GMAIL_SETUP.md` 참조
 
 #### 음성 입력
 ```kotlin
