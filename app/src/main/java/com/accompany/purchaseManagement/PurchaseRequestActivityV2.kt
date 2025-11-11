@@ -390,7 +390,7 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
     }
 
     /**
-     * Gmail을 통해 관리자에게 구매신청 알림 이메일 전송
+     * Gmail을 통해 관리자에게 구매신청 알림 이메일 전송 (지점별 담당자)
      */
     private suspend fun sendGmailNotification(
         requestId: String,
@@ -424,7 +424,65 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
                 status = com.accompany.purchaseManagement.data.models.PurchaseRequest.STATUS_PENDING
             )
             
-            // Gmail 이메일 전송
+            // 사용자의 지점 정보 확인
+            val userLocationId = currentUser?.locationId
+            
+            if (!userLocationId.isNullOrEmpty()) {
+                // 지점이 배정된 경우: 해당 지점의 담당자들에게 이메일 전송
+                val locationHelper = com.accompany.purchaseManagement.utils.LocationHelper.getInstance()
+                val locationResult = locationHelper.getLocation(userLocationId)
+                
+                if (locationResult.isSuccess) {
+                    val locationInfo = locationResult.getOrNull()
+                    if (locationInfo != null) {
+                        // 지점의 모든 수신자 이메일 (주담당자 + 부담당자 + 상급자)
+                        val recipientEmails = locationInfo.getAllRecipientEmails()
+                        
+                        if (recipientEmails.isNotEmpty()) {
+                            // 복수 수신자에게 이메일 전송
+                            val result = gmailHelper.sendPurchaseRequestEmailToMultiple(
+                                request = purchaseRequest,
+                                recipientEmails = recipientEmails,
+                                locationName = locationInfo.name
+                            )
+                            
+                            if (result.isSuccess) {
+                                Log.d("PurchaseRequestActivityV2", 
+                                    "Gmail notification sent to ${recipientEmails.size} recipients at ${locationInfo.name}")
+                            } else {
+                                Log.w("PurchaseRequestActivityV2", 
+                                    "Failed to send Gmail notification to location managers: ${result.exceptionOrNull()?.message}")
+                            }
+                        } else {
+                            Log.w("PurchaseRequestActivityV2", "No recipient emails found for location: ${locationInfo.name}")
+                            // 대체로 기본 관리자에게 전송
+                            sendToDefaultAdmin(purchaseRequest)
+                        }
+                    } else {
+                        Log.w("PurchaseRequestActivityV2", "Location not found: $userLocationId")
+                        sendToDefaultAdmin(purchaseRequest)
+                    }
+                } else {
+                    Log.e("PurchaseRequestActivityV2", "Failed to get location info", locationResult.exceptionOrNull())
+                    sendToDefaultAdmin(purchaseRequest)
+                }
+            } else {
+                // 지점이 배정되지 않은 경우: 기본 관리자에게 전송
+                Log.d("PurchaseRequestActivityV2", "User has no location assigned, sending to default admin")
+                sendToDefaultAdmin(purchaseRequest)
+            }
+            
+        } catch (e: Exception) {
+            Log.e("PurchaseRequestActivityV2", "Error sending Gmail notification", e)
+            // 이메일 전송 실패는 치명적이지 않으므로 계속 진행
+        }
+    }
+    
+    /**
+     * 기본 관리자에게 이메일 전송 (대체 방법)
+     */
+    private suspend fun sendToDefaultAdmin(purchaseRequest: com.accompany.purchaseManagement.data.models.PurchaseRequest) {
+        try {
             val result = gmailHelper.sendPurchaseRequestEmail(
                 request = purchaseRequest,
                 adminEmail = AppConfig.MANAGER_EMAIL

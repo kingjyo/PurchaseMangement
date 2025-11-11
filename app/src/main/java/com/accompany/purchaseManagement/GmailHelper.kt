@@ -80,7 +80,7 @@ class GmailHelper(private val context: Context) {
     }
     
     /**
-     * 구매신청 알림 이메일 전송
+     * 구매신청 알림 이메일 전송 (단일 수신자)
      * 
      * @param request 구매신청 정보
      * @param adminEmail 관리자 이메일 주소 (수신자)
@@ -119,9 +119,74 @@ class GmailHelper(private val context: Context) {
     }
     
     /**
+     * 구매신청 알림 이메일 전송 (복수 수신자)
+     * 지점의 모든 담당자와 상급자에게 이메일 전송
+     * 
+     * @param request 구매신청 정보
+     * @param recipientEmails 수신자 이메일 목록
+     * @param locationName 지점명 (이메일에 표시)
+     * @return 전송 성공 여부
+     */
+    suspend fun sendPurchaseRequestEmailToMultiple(
+        request: PurchaseRequest,
+        recipientEmails: List<String>,
+        locationName: String = ""
+    ): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
+            if (gmailService == null) {
+                if (!initializeWithCurrentAccount()) {
+                    return@withContext Result.failure(
+                        Exception("Gmail service not initialized. Please login with Google first.")
+                    )
+                }
+            }
+            
+            if (recipientEmails.isEmpty()) {
+                return@withContext Result.failure(
+                    Exception("No recipient emails provided")
+                )
+            }
+            
+            val emailContent = createEmailContent(request, locationName)
+            
+            // 각 수신자에게 개별 이메일 전송
+            val results = mutableListOf<Boolean>()
+            for (email in recipientEmails) {
+                try {
+                    val mimeMessage = createMimeMessage(
+                        to = email,
+                        subject = "알림: 구매신청 도착${if (locationName.isNotEmpty()) " - $locationName" else ""}",
+                        bodyHtml = emailContent
+                    )
+                    
+                    val message = createGmailMessage(mimeMessage)
+                    gmailService?.users()?.messages()?.send("me", message)?.execute()
+                    
+                    Log.d(TAG, "Purchase request email sent successfully to $email")
+                    results.add(true)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to send email to $email", e)
+                    results.add(false)
+                }
+            }
+            
+            // 최소 한 명에게라도 전송되었으면 성공으로 처리
+            if (results.any { it }) {
+                Log.d(TAG, "Emails sent to ${results.count { it }} out of ${recipientEmails.size} recipients")
+                Result.success(Unit)
+            } else {
+                Result.failure(Exception("Failed to send emails to all recipients"))
+            }
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to send purchase request emails to multiple recipients", e)
+            Result.failure(e)
+        }
+    }
+    /**
      * 구매신청 정보를 HTML 이메일 본문으로 변환
      */
-    private fun createEmailContent(request: PurchaseRequest): String {
+    private fun createEmailContent(request: PurchaseRequest, locationName: String = ""): String {
         val photoSection = if (request.photoUrls.isNotEmpty()) {
             """
             <div style="margin-top: 20px;">
@@ -225,6 +290,9 @@ class GmailHelper(private val context: Context) {
             <body>
                 <div class="header">
                     <h1>🔔 새로운 구매신청이 도착했습니다</h1>
+                    ${if (locationName.isNotEmpty()) """
+                    <p style="margin: 5px 0 0 0; font-size: 16px; font-weight: bold;">📍 $locationName</p>
+                    """ else ""}
                     <p style="margin: 10px 0 0 0; font-size: 14px;">신청일시: ${request.requestDate}</p>
                 </div>
                 
@@ -249,6 +317,12 @@ class GmailHelper(private val context: Context) {
                             <span class="label">이메일:</span>
                             <span class="value">${request.applicantEmail}</span>
                         </div>
+                        ${if (locationName.isNotEmpty()) """
+                        <div class="info-row">
+                            <span class="label">지점:</span>
+                            <span class="value"><strong>$locationName</strong></span>
+                        </div>
+                        """ else ""}
                     </div>
                     
                     <!-- 2. 구매 정보 -->
