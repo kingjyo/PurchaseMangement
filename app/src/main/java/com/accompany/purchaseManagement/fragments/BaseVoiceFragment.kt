@@ -90,7 +90,7 @@ abstract class BaseVoiceFragment : Fragment() {
         try {
             val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
                 putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.KOREAN.toString())
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE, "ko-KR")
                 putExtra(RecognizerIntent.EXTRA_PROMPT, "말씀해 주세요")
                 putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
             }

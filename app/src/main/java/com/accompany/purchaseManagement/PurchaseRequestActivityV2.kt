@@ -197,15 +197,31 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
     private fun validateCurrentPage(): Boolean {
         return when (viewPager.currentItem) {
             0 -> { // 장비명
-                viewModel.equipmentName.value?.let { it.isNotEmpty() && it.length >= 2 } ?: false
+                val equipmentName = viewModel.equipmentName.value
+                if (equipmentName.isNullOrEmpty() || equipmentName.length < 2) {
+                    Toast.makeText(this, "장비명을 2자 이상 입력해주세요", Toast.LENGTH_SHORT).show()
+                    false
+                } else {
+                    true
+                }
             }
             1 -> { // 수량
-                viewModel.quantity.value?.isNotEmpty() ?: false
+                val quantity = viewModel.quantity.value
+                if (quantity.isNullOrEmpty()) {
+                    Toast.makeText(this, "수량을 입력해주세요", Toast.LENGTH_SHORT).show()
+                    false
+                } else {
+                    true
+                }
             }
             2 -> true  // 장소 (선택사항)
             3 -> { // 용도
                 val fragment = supportFragmentManager.findFragmentByTag("f3") as? PurposeFragment
-                fragment?.isPurposeValid() ?: false
+                val isValid = fragment?.isPurposeValid() ?: false
+                if (!isValid) {
+                    Toast.makeText(this, "용도를 입력해주세요", Toast.LENGTH_SHORT).show()
+                }
+                isValid
             }
             4 -> true  // 기타사항 (선택사항)
             5 -> true  // 사진 (선택사항)
