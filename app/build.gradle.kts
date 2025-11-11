@@ -99,6 +99,7 @@ dependencies {
     implementation(libs.google.http.client.android)
     implementation(libs.gms.play.services.auth)
     implementation(libs.gson)
+    implementation(libs.javax.mail)  // JavaMail API for email composition
 
     // 네이버 로그인 SDK
     implementation ("com.navercorp.nid:oauth:5.9.0")
