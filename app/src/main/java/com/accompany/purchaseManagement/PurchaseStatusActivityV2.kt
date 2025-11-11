@@ -2,6 +2,8 @@ package com.accompany.purchaseManagement
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.ListView
 import android.widget.ProgressBar
@@ -226,5 +228,40 @@ class PurchaseStatusActivityV2 : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         loadRequests()
+    }
+    
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_purchase_status, menu)
+        return true
+    }
+    
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_profile -> {
+                showUserProfileDialog()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+    
+    private fun showUserProfileDialog() {
+        currentUser?.let { user ->
+            val message = """
+                📧 이메일: ${user.email}
+                👤 이름: ${user.name}
+                🏢 부서: ${user.department}
+                👔 역할: ${user.getDisplayRole()}
+                📍 지점: ${user.getLocationDisplay()}
+            """.trimIndent()
+            
+            AlertDialog.Builder(this)
+                .setTitle("내 계정 정보")
+                .setMessage(message)
+                .setPositiveButton("확인", null)
+                .show()
+        } ?: run {
+            Toast.makeText(this, "사용자 정보를 불러올 수 없습니다", Toast.LENGTH_SHORT).show()
+        }
     }
 }

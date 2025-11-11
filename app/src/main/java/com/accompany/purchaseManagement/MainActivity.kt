@@ -213,6 +213,10 @@ class MainActivity : AppCompatActivity() {
     
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
+            R.id.action_profile -> {
+                showUserProfileDialog()
+                true
+            }
             R.id.action_logout -> {
                 showLogoutDialog()
                 true
@@ -226,6 +230,26 @@ class MainActivity : AppCompatActivity() {
             //     true
             // }
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+    
+    private fun showUserProfileDialog() {
+        currentUser?.let { user ->
+            val message = """
+                📧 이메일: ${user.email}
+                👤 이름: ${user.name}
+                🏢 부서: ${user.department}
+                👔 역할: ${user.getDisplayRole()}
+                📍 지점: ${user.getLocationDisplay()}
+            """.trimIndent()
+            
+            AlertDialog.Builder(this)
+                .setTitle("내 계정 정보")
+                .setMessage(message)
+                .setPositiveButton("확인", null)
+                .show()
+        } ?: run {
+            Toast.makeText(this, "사용자 정보를 불러올 수 없습니다", Toast.LENGTH_SHORT).show()
         }
     }
     
