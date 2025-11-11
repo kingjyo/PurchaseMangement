@@ -7,14 +7,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
-import android.widget.ImageButton
 import com.accompany.purchaseManagement.R
 import com.accompany.purchaseManagement.PurchaseRequestActivityV2
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class PurposeFragment : BaseVoiceFragment() {
     
     private lateinit var etPurpose: EditText
-    private lateinit var btnMic: ImageButton
+    private lateinit var fabMic: FloatingActionButton
     
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -29,10 +29,10 @@ class PurposeFragment : BaseVoiceFragment() {
         
         // View 초기화
         etPurpose = view.findViewById(R.id.etPurpose)
-        btnMic = view.findViewById(R.id.btnMic)
+        fabMic = view.findViewById(R.id.fabMic)
         
         // 음성 입력 설정
-        setupVoiceInput(etPurpose, btnMic)
+        setupVoiceInput(etPurpose, fabMic)
         
         // 텍스트 변경 리스너
         etPurpose.addTextChangedListener(object : TextWatcher {
@@ -62,6 +62,14 @@ class PurposeFragment : BaseVoiceFragment() {
                 etPurpose.setText(purpose)
             }
         }
+    }
+    
+    fun getPurpose(): String {
+        return etPurpose.text.toString().trim()
+    }
+    
+    fun isPurposeValid(): Boolean {
+        return etPurpose.text.toString().trim().isNotEmpty()
     }
     
     fun validateInput(): Boolean {

@@ -16,6 +16,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.accompany.purchaseManagement.R
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.util.Locale
 
 /**
@@ -31,7 +32,7 @@ abstract class BaseVoiceFragment : Fragment() {
     private var speechRecognizer: SpeechRecognizer? = null
     private var isListening = false
     protected var targetEditText: EditText? = null
-    protected var micButton: ImageButton? = null
+    protected var micButton: View? = null
     
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -49,7 +50,7 @@ abstract class BaseVoiceFragment : Fragment() {
         speechRecognizer?.setRecognitionListener(createRecognitionListener())
     }
     
-    protected fun setupVoiceInput(editText: EditText, micButton: ImageButton) {
+    protected fun setupVoiceInput(editText: EditText, micButton: View) {
         this.targetEditText = editText
         this.micButton = micButton
         
@@ -117,9 +118,18 @@ abstract class BaseVoiceFragment : Fragment() {
     }
     
     private fun updateMicButtonState(isActive: Boolean) {
-        micButton?.setImageResource(
-            if (isActive) R.drawable.ic_mic_active else R.drawable.ic_mic
-        )
+        when (micButton) {
+            is ImageButton -> {
+                (micButton as ImageButton).setImageResource(
+                    if (isActive) R.drawable.ic_mic_active else R.drawable.ic_mic
+                )
+            }
+            is FloatingActionButton -> {
+                (micButton as FloatingActionButton).setImageResource(
+                    if (isActive) R.drawable.ic_mic_active else R.drawable.ic_mic
+                )
+            }
+        }
     }
     
     private fun createRecognitionListener() = object : RecognitionListener {

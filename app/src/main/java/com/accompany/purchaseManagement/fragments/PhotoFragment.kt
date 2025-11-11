@@ -40,8 +40,6 @@ class PhotoFragment : Fragment() {
         private const val MAX_PHOTOS = 5
     }
     
-    private lateinit var btnCamera: Button
-    private lateinit var btnGallery: Button
     private lateinit var tvPhotoCount: TextView
     private lateinit var rvPhotos: RecyclerView
     
@@ -86,10 +84,13 @@ class PhotoFragment : Fragment() {
     }
     
     private fun initViews(view: View) {
-        btnCamera = view.findViewById(R.id.btnCamera)
-        btnGallery = view.findViewById(R.id.btnGallery)
+        val btnAddPhoto = view.findViewById<Button>(R.id.btnAddPhoto)
         tvPhotoCount = view.findViewById(R.id.tvPhotoCount)
         rvPhotos = view.findViewById(R.id.rvPhotos)
+        
+        btnAddPhoto.setOnClickListener {
+            showPhotoSourceDialog()
+        }
     }
     
     private fun setupRecyclerView() {
@@ -109,31 +110,37 @@ class PhotoFragment : Fragment() {
     }
     
     private fun setupButtons() {
-        btnCamera.setOnClickListener {
-            if (photoUris.size >= MAX_PHOTOS) {
-                Toast.makeText(context, "최대 ${MAX_PHOTOS}장까지 추가할 수 있습니다", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            
-            if (checkCameraPermission()) {
-                openCamera()
-            } else {
-                requestCameraPermission()
-            }
+        // Button is set up in initViews
+    }
+    
+    private fun showPhotoSourceDialog() {
+        if (photoUris.size >= MAX_PHOTOS) {
+            Toast.makeText(context, "최대 ${MAX_PHOTOS}장까지 추가할 수 있습니다", Toast.LENGTH_SHORT).show()
+            return
         }
         
-        btnGallery.setOnClickListener {
-            if (photoUris.size >= MAX_PHOTOS) {
-                Toast.makeText(context, "최대 ${MAX_PHOTOS}장까지 추가할 수 있습니다", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
+        val options = arrayOf("카메라로 촬영", "갤러리에서 선택")
+        androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            .setTitle("사진 추가")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> {
+                        if (checkCameraPermission()) {
+                            openCamera()
+                        } else {
+                            requestCameraPermission()
+                        }
+                    }
+                    1 -> {
+                        if (checkStoragePermission()) {
+                            openGallery()
+                        } else {
+                            requestStoragePermission()
+                        }
+                    }
+                }
             }
-            
-            if (checkStoragePermission()) {
-                openGallery()
-            } else {
-                requestStoragePermission()
-            }
-        }
+            .show()
     }
     
     private fun checkCameraPermission(): Boolean {
@@ -293,4 +300,10 @@ class PhotoFragment : Fragment() {
     }
     
     fun getPhotoUris(): List<Uri> = photoUris.toList()
+    
+    // Called from parent activity when photo is added via camera
+    fun onPhotoAdded() {
+        photoAdapter.notifyDataSetChanged()
+        updatePhotoCount()
+    }
 }
