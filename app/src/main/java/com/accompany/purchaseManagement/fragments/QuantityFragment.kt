@@ -7,14 +7,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
-import android.widget.ImageButton
 import com.accompany.purchaseManagement.R
 import com.accompany.purchaseManagement.PurchaseRequestActivityV2
 
 class QuantityFragment : BaseVoiceFragment() {
     
     private lateinit var etQuantity: EditText
-    private lateinit var btnMic: ImageButton
     
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -29,10 +27,6 @@ class QuantityFragment : BaseVoiceFragment() {
         
         // View 초기화
         etQuantity = view.findViewById(R.id.etQuantity)
-        btnMic = view.findViewById(R.id.btnMic)
-        
-        // 음성 입력 설정
-        setupVoiceInput(etQuantity, btnMic)
         
         // 텍스트 변경 리스너
         etQuantity.addTextChangedListener(object : TextWatcher {

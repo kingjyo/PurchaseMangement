@@ -19,7 +19,7 @@ class PhotoAdapter(
     
     class PhotoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val imageView: ImageView = itemView.findViewById(R.id.ivPhoto)
-        val btnRemove: View = itemView.findViewById(R.id.btnRemove)
+        val btnRemove: View = itemView.findViewById(R.id.btnDelete)
     }
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PhotoViewHolder {

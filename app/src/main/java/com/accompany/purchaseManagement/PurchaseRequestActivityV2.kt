@@ -59,7 +59,22 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
     private var purpose = ""
     private var note = ""
     var photoUris = mutableListOf<Uri>()
+    var localPhotoUris = mutableListOf<Uri>()  // For PhotoFragment sync
     private val viewModel: PurchaseViewModel by viewModels()
+    
+    // Purchase request data object
+    var purchaseRequest: PurchaseRequestV2 = PurchaseRequestV2(
+        applicantName = "",
+        applicantDepartment = "",
+        applicantEmail = "",
+        equipmentName = "",
+        quantity = "1",
+        location = "",
+        purpose = "",
+        note = "",
+        photoUrls = emptyList(),
+        requestDate = ""
+    )
     // 사진 촬영을 위한 ActivityResultLauncher
     private val photoCaptureLauncher =
         registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
