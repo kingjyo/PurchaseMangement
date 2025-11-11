@@ -7,6 +7,12 @@
         android:title="내 프로필"
         android:icon="@drawable/ic_person"
         app:showAsAction="ifRoom" />
+    
+    <item
+        android:id="@+id/action_change_location"
+        android:title="지점 변경"
+        android:icon="@android:drawable/ic_menu_mylocation"
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/action_logout"

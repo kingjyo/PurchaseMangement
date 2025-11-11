@@ -122,8 +122,13 @@ class MainActivity : AppCompatActivity() {
     
     private fun updateUI() {
         currentUser?.let { user ->
-            // 환영 메시지 업데이트
-            val welcomeMessage = "${user.name}님 (${user.department})\n${user.getDisplayRole()}"
+            // 환영 메시지 업데이트 (지점 정보 포함)
+            val locationInfo = user.getLocationDisplay()
+            val welcomeMessage = """
+                ${user.name}님 (${user.department})
+                ${user.getDisplayRole()}
+                📍 $locationInfo
+            """.trimIndent()
             tvWelcome.text = welcomeMessage
             
             // 역할에 따른 버튼 표시/숨김
@@ -210,6 +215,10 @@ class MainActivity : AppCompatActivity() {
         return when (item.itemId) {
             R.id.action_logout -> {
                 showLogoutDialog()
+                true
+            }
+            R.id.action_change_location -> {
+                navigateToActivity(LocationSelectionActivity::class.java)
                 true
             }
             // R.id.action_refresh -> {

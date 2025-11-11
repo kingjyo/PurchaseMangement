@@ -29,6 +29,14 @@ data class User(
     @SerializedName("역할")
     val role: String = ROLE_USER,
     
+    @PropertyName("locationId")
+    @SerializedName("지점ID")
+    val locationId: String? = null,
+    
+    @PropertyName("locationName")
+    @SerializedName("지점명")
+    val locationName: String? = null,
+    
     @PropertyName("profileImageUrl")
     @SerializedName("프로필이미지URL")
     val profileImageUrl: String? = null,
@@ -73,6 +81,22 @@ data class User(
     }
     
     /**
+     * 지점 배정 여부 확인
+     */
+    fun hasLocation(): Boolean = !locationId.isNullOrEmpty()
+    
+    /**
+     * 지점 정보 표시
+     */
+    fun getLocationDisplay(): String {
+        return if (hasLocation()) {
+            locationName ?: "지점 정보 없음"
+        } else {
+            "지점 미배정"
+        }
+    }
+    
+    /**
      * Firebase에서 사용할 수 있는 Map 형태로 변환
      */
     fun toFirestoreMap(): Map<String, Any?> {
@@ -82,6 +106,8 @@ data class User(
             "email" to email,
             "department" to department,
             "role" to role,
+            "locationId" to locationId,
+            "locationName" to locationName,
             "profileImageUrl" to profileImageUrl,
             "phoneNumber" to phoneNumber,
             "fcmToken" to fcmToken,

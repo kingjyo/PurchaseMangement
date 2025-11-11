@@ -149,6 +149,18 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".PurchaseStatusActivityV2" />
         </activity>
+        
+        <!-- 지점 선택 액티비티 -->
+        <activity
+            android:name=".LocationSelectionActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:label="지점 선택"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
 
         <!-- 파일 제공자 (이미지 및 엑셀 파일 공유용) -->
         <provider

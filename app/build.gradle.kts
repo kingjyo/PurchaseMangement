@@ -92,12 +92,11 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:21.2.0")
 
 
-    // Gmail API 관련 의존성 (일시적으로 주석 처리 - 컴파일 테스트용)
-    // implementation("com.google.apis:google-api-services-gmail:v1-rev20240829-2.0.0")
-    // implementation("com.google.api-client:google-api-client:2.2.0")
-    // implementation("com.google.api-client:google-api-client-android:2.2.0")
-    // implementation("com.google.oauth-client:google-oauth-client-jetty:1.34.1")
-    // implementation("com.google.http-client:google-http-client-gson:1.43.3")
+    // Gmail API 관련 의존성
+    implementation(libs.google.api.services.gmail)
+    implementation(libs.google.api.client.android)
+    implementation(libs.google.oauth.client)
+    implementation(libs.google.http.client.android)
     implementation(libs.gms.play.services.auth)
     implementation(libs.gson)
 

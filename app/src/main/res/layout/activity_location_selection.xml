@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <!-- 안내 텍스트 -->
+    <TextView
+        android:id="@+id/tvInstructions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="근무하시는 지점을 선택해주세요.\n선택하신 지점의 담당자에게 구매신청이 전송됩니다."
+        android:textSize="16sp"
+        android:textColor="@android:color/black"
+        android:layout_marginBottom="16dp"
+        android:padding="12dp"
+        android:background="#E3F2FD"
+        android:layout_marginTop="8dp"/>
+
+    <!-- 지점 목록 RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewLocations"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_below="@id/tvInstructions"
+        android:layout_above="@id/btnSkip"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- 지점이 없을 때 표시되는 텍스트 -->
+    <TextView
+        android:id="@+id/tvNoLocations"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="등록된 지점이 없습니다.\n관리자에게 문의해주세요."
+        android:textSize="16sp"
+        android:textColor="@android:color/darker_gray"
+        android:gravity="center"
+        android:visibility="gone"/>
+
+    <!-- 로딩 표시 -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone"/>
+
+    <!-- 건너뛰기 버튼 -->
+    <Button
+        android:id="@+id/btnSkip"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:text="나중에 선택하기"
+        android:textSize="16sp"/>
+
+</RelativeLayout>
