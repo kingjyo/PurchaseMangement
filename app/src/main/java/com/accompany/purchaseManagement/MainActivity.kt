@@ -122,8 +122,13 @@ class MainActivity : AppCompatActivity() {
     
     private fun updateUI() {
         currentUser?.let { user ->
-            // 환영 메시지 업데이트
-            val welcomeMessage = "${user.name}님 (${user.department})\n${user.getDisplayRole()}"
+            // 환영 메시지 업데이트 (지점 정보 포함)
+            val locationInfo = user.getLocationDisplay()
+            val welcomeMessage = """
+                ${user.name}님 (${user.department})
+                ${user.getDisplayRole()}
+                📍 $locationInfo
+            """.trimIndent()
             tvWelcome.text = welcomeMessage
             
             // 역할에 따른 버튼 표시/숨김
@@ -208,8 +213,16 @@ class MainActivity : AppCompatActivity() {
     
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
+            R.id.action_profile -> {
+                showUserProfileDialog()
+                true
+            }
             R.id.action_logout -> {
                 showLogoutDialog()
+                true
+            }
+            R.id.action_change_location -> {
+                navigateToActivity(LocationSelectionActivity::class.java)
                 true
             }
             // R.id.action_refresh -> {
@@ -217,6 +230,26 @@ class MainActivity : AppCompatActivity() {
             //     true
             // }
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+    
+    private fun showUserProfileDialog() {
+        currentUser?.let { user ->
+            val message = """
+                📧 이메일: ${user.email}
+                👤 이름: ${user.name}
+                🏢 부서: ${user.department}
+                👔 역할: ${user.getDisplayRole()}
+                📍 지점: ${user.getLocationDisplay()}
+            """.trimIndent()
+            
+            AlertDialog.Builder(this)
+                .setTitle("내 계정 정보")
+                .setMessage(message)
+                .setPositiveButton("확인", null)
+                .show()
+        } ?: run {
+            Toast.makeText(this, "사용자 정보를 불러올 수 없습니다", Toast.LENGTH_SHORT).show()
         }
     }
     

@@ -1,6 +1,7 @@
 object AppConfig {
 
-    // 📧 관리자 이메일 주소 (사진 전송용)
+    // 📧 관리자 이메일 주소 (Gmail로 구매신청 알림 수신)
+    // ⚠️ 이 이메일 주소로 구매신청 알림이 전송됩니다
     const val MANAGER_EMAIL = "clrns1234@gmail.com"
 
     // 📊 Google Apps Script 웹앱 URL (Google Sheets와 연동)
@@ -11,7 +12,7 @@ object AppConfig {
     const val AUTO_CLEANUP_MONTHS = 1000
 
     // 📱 앱 버전
-    const val APP_VERSION = "1.0"
+    const val APP_VERSION = "1.1"
 
     // 🔧 디버그 모드 (개발시에만 true, 배포시 false)
     const val DEBUG_MODE = true
@@ -23,6 +24,10 @@ object AppConfig {
 
     // 🔗 도움말 URL (선택사항)
     const val HELP_URL = "https://docs.google.com/document/d/13bmlpzMjyv77LrJvbvTM42j2tnJJ8a5UZVQqkyLuX1E/edit?tab=t.0"
+    
+    // 📧 Gmail API 설정
+    // Gmail 알림이 작동하려면 Google OAuth 로그인 시 Gmail.SEND 권한이 필요합니다
+    // LoginActivity2에서 Google 로그인 시 해당 권한이 자동으로 요청됩니다
 
     /**
      * 설정 검증 메소드

@@ -59,7 +59,22 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
     private var purpose = ""
     private var note = ""
     var photoUris = mutableListOf<Uri>()
+    var localPhotoUris = mutableListOf<Uri>()  // For PhotoFragment sync
     private val viewModel: PurchaseViewModel by viewModels()
+    
+    // Purchase request data object
+    var purchaseRequest: PurchaseRequestV2 = PurchaseRequestV2(
+        applicantName = "",
+        applicantDepartment = "",
+        applicantEmail = "",
+        equipmentName = "",
+        quantity = "1",
+        location = "",
+        purpose = "",
+        note = "",
+        photoUrls = emptyList(),
+        requestDate = ""
+    )
     // 사진 촬영을 위한 ActivityResultLauncher
     private val photoCaptureLauncher =
         registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
@@ -81,7 +96,7 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
     private val storage = FirebaseStorage.getInstance()
     private lateinit var dbHelper: PurchaseRequestDbHelper
     private lateinit var fcmHelper: FcmNotificationHelper
-    // private lateinit var emailHelper: EmailHelper // 대기 중
+    private lateinit var gmailHelper: GmailHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -110,7 +125,7 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
         currentUser = googleAuthHelper.getCurrentUser()
         dbHelper = PurchaseRequestDbHelper(this)
         fcmHelper = FcmNotificationHelper(this)
-        // emailHelper = EmailHelper(this) // 대기 중
+        gmailHelper = GmailHelper(this)
 
         initViews()
         setupViewPager()
@@ -182,15 +197,31 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
     private fun validateCurrentPage(): Boolean {
         return when (viewPager.currentItem) {
             0 -> { // 장비명
-                viewModel.equipmentName.value?.let { it.isNotEmpty() && it.length >= 2 } ?: false
+                val equipmentName = viewModel.equipmentName.value
+                if (equipmentName.isNullOrEmpty() || equipmentName.length < 2) {
+                    Toast.makeText(this, "장비명을 2자 이상 입력해주세요", Toast.LENGTH_SHORT).show()
+                    false
+                } else {
+                    true
+                }
             }
             1 -> { // 수량
-                viewModel.quantity.value?.isNotEmpty() ?: false
+                val quantity = viewModel.quantity.value
+                if (quantity.isNullOrEmpty()) {
+                    Toast.makeText(this, "수량을 입력해주세요", Toast.LENGTH_SHORT).show()
+                    false
+                } else {
+                    true
+                }
             }
             2 -> true  // 장소 (선택사항)
             3 -> { // 용도
                 val fragment = supportFragmentManager.findFragmentByTag("f3") as? PurposeFragment
-                fragment?.isPurposeValid() ?: false
+                val isValid = fragment?.isPurposeValid() ?: false
+                if (!isValid) {
+                    Toast.makeText(this, "용도를 입력해주세요", Toast.LENGTH_SHORT).show()
+                }
+                isValid
             }
             4 -> true  // 기타사항 (선택사항)
             5 -> true  // 사진 (선택사항)
@@ -306,6 +337,7 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
         val applicantDepartment = currentUser?.department ?: "미설정"
         val quantity = viewModel.quantity.value ?: "1"
         val applicantEmail = currentUser?.email ?: ""
+        val applicantId = currentUser?.id ?: ""
         val requestDate = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.KOREA).format(Date())
 
         lifecycleScope.launch {
@@ -323,6 +355,7 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
                 // Firestore에 저장
                 val equipmentName = viewModel.equipmentName.value ?: ""
                 val requestData = hashMapOf(
+                    "applicantId" to applicantId,
                     "applicantName" to applicantName,
                     "applicantDepartment" to applicantDepartment,
                     "applicantEmail" to applicantEmail,
@@ -353,8 +386,21 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
                     photoUrls = photoUrls.joinToString(",")
                 )
 
-                // 이메일 전송 (대기 중)
-                // emailHelper.sendPurchaseRequestEmail(applicantName, applicantDepartment, equipmentName, quantity, location, purpose, note, requestDate, photoUrls)
+                // Gmail로 이메일 전송
+                sendGmailNotification(
+                    requestId = requestId,
+                    applicantId = applicantId,
+                    applicantName = applicantName,
+                    applicantDepartment = applicantDepartment,
+                    applicantEmail = applicantEmail,
+                    equipmentName = equipmentName,
+                    quantity = quantity,
+                    location = location,
+                    purpose = purpose,
+                    note = note,
+                    photoUrls = photoUrls,
+                    requestDate = requestDate
+                )
 
                 // 관리자에게 FCM 알림
                 fcmHelper.notifyAdminNewRequest(applicantName, equipmentName, requestId)
@@ -371,6 +417,117 @@ class PurchaseRequestActivityV2 : AppCompatActivity() {
                 btnNext.isEnabled = true
                 progressBar.visibility = View.GONE
             }
+        }
+    }
+
+    /**
+     * Gmail을 통해 관리자에게 구매신청 알림 이메일 전송 (지점별 담당자)
+     */
+    private suspend fun sendGmailNotification(
+        requestId: String,
+        applicantId: String,
+        applicantName: String,
+        applicantDepartment: String,
+        applicantEmail: String,
+        equipmentName: String,
+        quantity: String,
+        location: String,
+        purpose: String,
+        note: String,
+        photoUrls: List<String>,
+        requestDate: String
+    ) {
+        try {
+            // PurchaseRequest 객체 생성
+            val purchaseRequest = com.accompany.purchaseManagement.data.models.PurchaseRequest(
+                id = requestId,
+                applicantId = applicantId,
+                applicantName = applicantName,
+                applicantDepartment = applicantDepartment,
+                applicantEmail = applicantEmail,
+                equipmentName = equipmentName,
+                quantity = quantity,
+                location = location,
+                purpose = purpose,
+                note = note,
+                photoUrls = photoUrls,
+                requestDate = requestDate,
+                status = com.accompany.purchaseManagement.data.models.PurchaseRequest.STATUS_PENDING
+            )
+            
+            // 사용자의 지점 정보 확인
+            val userLocationId = currentUser?.locationId
+            
+            if (!userLocationId.isNullOrEmpty()) {
+                // 지점이 배정된 경우: 해당 지점의 담당자들에게 이메일 전송
+                val locationHelper = com.accompany.purchaseManagement.utils.LocationHelper.getInstance()
+                val locationResult = locationHelper.getLocation(userLocationId)
+                
+                if (locationResult.isSuccess) {
+                    val locationInfo = locationResult.getOrNull()
+                    if (locationInfo != null) {
+                        // 지점의 모든 수신자 이메일 (주담당자 + 부담당자 + 상급자)
+                        val recipientEmails = locationInfo.getAllRecipientEmails()
+                        
+                        if (recipientEmails.isNotEmpty()) {
+                            // 복수 수신자에게 이메일 전송
+                            val result = gmailHelper.sendPurchaseRequestEmailToMultiple(
+                                request = purchaseRequest,
+                                recipientEmails = recipientEmails,
+                                locationName = locationInfo.name
+                            )
+                            
+                            if (result.isSuccess) {
+                                Log.d("PurchaseRequestActivityV2", 
+                                    "Gmail notification sent to ${recipientEmails.size} recipients at ${locationInfo.name}")
+                            } else {
+                                Log.w("PurchaseRequestActivityV2", 
+                                    "Failed to send Gmail notification to location managers: ${result.exceptionOrNull()?.message}")
+                            }
+                        } else {
+                            Log.w("PurchaseRequestActivityV2", "No recipient emails found for location: ${locationInfo.name}")
+                            // 대체로 기본 관리자에게 전송
+                            sendToDefaultAdmin(purchaseRequest)
+                        }
+                    } else {
+                        Log.w("PurchaseRequestActivityV2", "Location not found: $userLocationId")
+                        sendToDefaultAdmin(purchaseRequest)
+                    }
+                } else {
+                    Log.e("PurchaseRequestActivityV2", "Failed to get location info", locationResult.exceptionOrNull())
+                    sendToDefaultAdmin(purchaseRequest)
+                }
+            } else {
+                // 지점이 배정되지 않은 경우: 기본 관리자에게 전송
+                Log.d("PurchaseRequestActivityV2", "User has no location assigned, sending to default admin")
+                sendToDefaultAdmin(purchaseRequest)
+            }
+            
+        } catch (e: Exception) {
+            Log.e("PurchaseRequestActivityV2", "Error sending Gmail notification", e)
+            // 이메일 전송 실패는 치명적이지 않으므로 계속 진행
+        }
+    }
+    
+    /**
+     * 기본 관리자에게 이메일 전송 (대체 방법)
+     */
+    private suspend fun sendToDefaultAdmin(purchaseRequest: com.accompany.purchaseManagement.data.models.PurchaseRequest) {
+        try {
+            val result = gmailHelper.sendPurchaseRequestEmail(
+                request = purchaseRequest,
+                adminEmail = AppConfig.MANAGER_EMAIL
+            )
+            
+            if (result.isSuccess) {
+                Log.d("PurchaseRequestActivityV2", "Gmail notification sent successfully to ${AppConfig.MANAGER_EMAIL}")
+            } else {
+                Log.w("PurchaseRequestActivityV2", "Failed to send Gmail notification: ${result.exceptionOrNull()?.message}")
+                // Gmail 전송 실패는 전체 프로세스를 중단하지 않음 (FCM이 백업 역할)
+            }
+        } catch (e: Exception) {
+            Log.e("PurchaseRequestActivityV2", "Error sending Gmail notification", e)
+            // 이메일 전송 실패는 치명적이지 않으므로 계속 진행
         }
     }
 

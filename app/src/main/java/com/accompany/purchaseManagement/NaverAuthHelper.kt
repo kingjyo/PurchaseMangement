@@ -16,11 +16,6 @@ class NaverAuthHelper(private val activity: Activity) {
 
     companion object {
         private const val TAG = "NaverAuthHelper"
-
-        // 네이버 앱 정보 (네이버 개발자 센터에서 발급)
-        private const val NAVER_CLIENT_ID = "CLIENT_ID"
-        private const val NAVER_CLIENT_SECRET = "CLIENT_SECRET"
-        private const val NAVER_CLIENT_NAME = "구매신청"
     }
 
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
@@ -29,11 +24,15 @@ class NaverAuthHelper(private val activity: Activity) {
 
     init {
         // 네이버 로그인 SDK 초기화
+        val naverClientId = activity.getString(R.string.naver_client_id)
+        val naverClientSecret = activity.getString(R.string.naver_client_secret)
+        val naverClientName = activity.getString(R.string.naver_client_name)
+        
         NaverIdLoginSDK.initialize(
             activity,
-            NAVER_CLIENT_ID,
-            NAVER_CLIENT_SECRET,
-            NAVER_CLIENT_NAME
+            naverClientId,
+            naverClientSecret,
+            naverClientName
         )
     }
 

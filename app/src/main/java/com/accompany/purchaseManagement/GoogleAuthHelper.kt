@@ -37,10 +37,11 @@ class GoogleAuthHelper(private val activity: Activity) {
     private val KEY_IS_ADMIN = "isAdmin"
 
     init {
-        // Google Sign In 옵션 설정
+        // Google Sign In 옵션 설정 (Gmail 전송 권한 포함)
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(activity.getString(R.string.default_web_client_id))
             .requestEmail()
+            .requestScopes(com.google.android.gms.common.api.Scope("https://www.googleapis.com/auth/gmail.send"))
             .build()
 
         googleSignInClient = GoogleSignIn.getClient(activity, gso)
